@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+
+# Skill-local scratch state (e.g. self-upgrade planning files a skill writes
+# for itself). Machine-specific, not meant to be committed.
+**/.upgrade/

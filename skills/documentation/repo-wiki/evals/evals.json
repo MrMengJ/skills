@@ -1,0 +1,51 @@
+{
+  "skill_name": "repo-wiki",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "帮我给这个项目生成一份 repo wiki，项目在 /Users/mengjin/.agents/skills/repo-wiki-workspace/iteration-1/fixtures/kb-app-VARIANT（一个 Electron + React 的本地知识库小应用）。这是一次自动化验证，决策点不要停下来问我，统一按这些答案走：首要受众＝维护者，不加次要受众，输出语言中文，输出目录 ./.wiki/，启用 mermaid，每轮结束不暂停一口气跑完；章节草稿控制在 2 章、每章 2 页（小规模验证），直接接受草稿。生成完成后跑一遍验证。",
+      "expected_output": "在项目下生成 .wiki/：三层结构 维护者指南/NN-章/NN-页.md，每章 README.md，INDEX.md 含 <!-- repo-wiki-managed --> marker，HOW-TO-UPDATE.md，.wiki-meta/index.json + pages/**.json + runtime.json；概念型页面含 mermaid；跑过 check-dead-links / check-mermaid / wiki-stats",
+      "files": [],
+      "expectations": [
+        "输出目录 .wiki/ 存在，且页面采用三层结构：<受众目录>/<NN-章节>/<NN-页面>.md",
+        "每个章节目录都含 README.md 门面页",
+        "INDEX.md 存在且含 <!-- repo-wiki-managed --> marker",
+        "HOW-TO-UPDATE.md 存在且提到 /repo-wiki --update",
+        ".wiki-meta/index.json 存在并通过 delta-schema.py validate（含 --repo-root 源码存在性检查）",
+        "每个页面 .md 都有对应的 .wiki-meta/pages/**.json，且含 source_files / page_type / template_version / status",
+        "概念型或混合型页面每页至少 1 个 mermaid 块，且全部 mermaid 块无字面 \\n",
+        "运行记录显示执行了 check-dead-links.py、check-mermaid.py、wiki-stats.py 三个验证脚本",
+        "每个页面 json 的 source_files[].path 都是项目内真实存在的文件（不是目录、不是编造）",
+        ".wiki-meta/runtime.json 存在且含 skill_root 与 platform_capabilities"
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "仓库 /Users/mengjin/.agents/skills/repo-wiki-workspace/iteration-1/fixtures/dsh-VARIANT 之前用 /repo-wiki 生成过 wiki（在 .wiki/ 下，元数据在 .wiki/.wiki-meta/），之后代码改了很多。帮我跑一次 /repo-wiki --dry-run，看看哪些 wiki 页会受影响、有没有手动改动冲突、有没有新出现的未覆盖模块。不要改动任何文件。把分析结果整理成一份 markdown 报告保存到 OUTPUTS/dry-run-report.md。确认环节不用问我，按默认继续。",
+      "expected_output": "报告包含：schema 校验结果、git 预检、自 last_synced_commit 以来的 commit 数、受影响页（primary / supporting / deprecated 数量与清单）、冲突检测结果、孤儿/新模块提示；.wiki/ 与 .wiki-meta/ 未被修改",
+      "files": [],
+      "expectations": [
+        "dry-run-report.md 存在且非空",
+        "仓库内 .wiki/ 及 .wiki-meta/ 在运行前后内容一致（未被修改）",
+        "报告给出受影响页分组（primary / supporting / deprecated 或等价中文）及各组数量",
+        "报告包含 schema 校验与 git 预检的结果",
+        "报告包含手动改动冲突检测的结果",
+        "报告包含孤儿文件 / 未覆盖新模块的提示",
+        "运行记录显示调用了 delta-schema.py validate、delta-git.py affected-pages、delta-conflicts.py check"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我记得 repo-wiki 这个 skill 有个 --help，帮我看看 /repo-wiki --help 会输出什么、都支持哪些参数，把完整输出保存到 OUTPUTS/help.txt，不要开始生成任何 wiki。",
+      "expected_output": "help.txt 含版本号 v2.1.0、命令用法、参数表（--update / --rebuild / --dry-run / --from / --platform / --upgrade / --recover / --help）、元命令说明；没有进入 Phase 0，没有写其他文件",
+      "files": [],
+      "expectations": [
+        "help.txt 存在且含 SKILL.md 当前的版本号（<!-- skill-version -->）",
+        "help.txt 列出 --update、--rebuild、--dry-run、--upgrade、--help 参数",
+        "help.txt 含元命令说明（? / back / skip-all / cancel）",
+        "没有开始生成 wiki：运行记录里没有 Phase 0 调研、决策点或页面写入步骤",
+        "运行记录显示调用了 scripts/help.py 而不是自行编造帮助文本"
+      ]
+    }
+  ]
+}

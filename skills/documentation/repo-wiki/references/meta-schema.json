@@ -1,0 +1,333 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wiki Meta Schema v2",
+  "description": "repo-wiki-generator .wiki-meta/ 目录的 schema 定义",
+  "definitions": {
+    "IndexSchema": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "generated_at",
+        "last_synced_commit",
+        "primary_type",
+        "wiki_root",
+        "is_fork",
+        "audience",
+        "output_language"
+      ],
+      "properties": {
+        "schema_version": {
+          "type": "integer",
+          "minimum": 2
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_synced_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$",
+          "description": "完整 40 位 commit hash；符号引用（HEAD / 分支名 / 短 hash）会让 Phase Δ 的 diff 恒为空"
+        },
+        "last_synced_branch": {
+          "type": "string"
+        },
+        "primary_type": {
+          "type": "string",
+          "enum": [
+            "typescript-library",
+            "javascript-library",
+            "python-service",
+            "go-service",
+            "rust-cli",
+            "java-service",
+            "php-service",
+            "monorepo",
+            "microservices",
+            "business-app",
+            "desktop-app",
+            "frontend-app",
+            "nodejs-cli",
+            "other"
+          ]
+        },
+        "secondary_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "wiki_root": {
+          "type": "string"
+        },
+        "is_fork": {
+          "type": "boolean"
+        },
+        "upstream_version": {
+          "type": "string"
+        },
+        "audience": {
+          "type": "object",
+          "required": [
+            "primary"
+          ],
+          "properties": {
+            "primary": {
+              "type": "string",
+              "enum": [
+                "maintainer",
+                "user",
+                "newcomer",
+                "business"
+              ]
+            },
+            "secondary": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "output_language": {
+          "type": "string"
+        },
+        "template_versions": {
+          "type": "object",
+          "properties": {
+            "conceptual": {
+              "type": "integer"
+            },
+            "reference": {
+              "type": "integer"
+            },
+            "mixed": {
+              "type": "integer"
+            },
+            "decision-log": {
+              "type": "integer"
+            }
+          }
+        },
+        "template_upgrade_suppressed_until": {
+          "type": "object"
+        },
+        "ignore_patterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "renamed_files_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to",
+              "commit"
+            ],
+            "properties": {
+              "from": {
+                "type": "string"
+              },
+              "to": {
+                "type": "string"
+              },
+              "commit": {
+                "type": "string"
+              },
+              "chain": {
+                "type": "array"
+              }
+            }
+          }
+        },
+        "target_pages": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "chapters": {
+          "type": "array",
+          "description": "章节列表；v2.1+ 新增 audience_dir / chapter_dir / pages 字段（可选，向后兼容）",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "type",
+              "target_pages"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[0-9]{2}$"
+              },
+              "title": {
+                "type": "string"
+              },
+              "audience_dir": {
+                "type": "string",
+                "description": "v2.1+ 受众目录名（全中文，如「维护者指南」）；v2.0 wiki 可缺省"
+              },
+              "chapter_dir": {
+                "type": "string",
+                "pattern": "^[0-9]{2}-",
+                "description": "v2.1+ 章节目录名（NN-中文主题，编号在受众目录内独立）；v2.0 wiki 可缺省"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "conceptual",
+                  "reference",
+                  "mixed",
+                  "decision-log"
+                ]
+              },
+              "target_pages": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "pages": {
+                "type": "array",
+                "description": "v2.1+ 章内页面索引；v2.0 wiki 可缺省",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "file",
+                    "title"
+                  ],
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "pattern": "^[0-9]{2}-.*\\.md$"
+                    },
+                    "title": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "run_config": {
+          "type": "object",
+          "properties": {
+            "pause_between_rounds": {
+              "type": "string",
+              "enum": [
+                "always",
+                "never",
+                "first-time-only",
+                "risk-points-only"
+              ]
+            },
+            "mermaid_enabled": {
+              "type": "boolean"
+            }
+          }
+        },
+        "_comment": {
+          "type": "string"
+        },
+        "last_synced_at": {
+          "type": "string",
+          "description": "上次 update-sync 的时间戳（ISO 8601）"
+        },
+        "source_root": {
+          "type": "string",
+          "description": "source_files[].path 相对于哪个目录，相对 wiki 根目录解析。常见布局 <项目>/.wiki 对应 \"..\"（默认值）；工作区级 wiki 覆盖多个仓库时可能是 \"../..\"。不记录它，校验和反向映射就只能靠 --repo-root 猜",
+          "default": ".."
+        }
+      }
+    },
+    "PageSchema": {
+      "type": "object",
+      "required": [
+        "source_files",
+        "page_type",
+        "template_version",
+        "status"
+      ],
+      "properties": {
+        "source_files": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "path",
+              "role"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "项目根起的文件相对路径。必须是具体文件：目录不会出现在 git diff 的文件列表里，写目录会让该页永远不被判为受影响"
+              },
+              "role": {
+                "type": "string",
+                "enum": [
+                  "primary",
+                  "supporting",
+                  "secondary"
+                ],
+                "description": "secondary 是 supporting 的历史别名（2026-07 期间生成的 wiki），脚本兼容但新产物一律用 supporting"
+              }
+            }
+          }
+        },
+        "anchor_material": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "page_type": {
+          "type": "string",
+          "enum": [
+            "conceptual",
+            "reference",
+            "mixed",
+            "decision-log"
+          ]
+        },
+        "template_version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "deprecated"
+          ]
+        },
+        "content_sha256_normalized": {
+          "type": "string"
+        },
+        "normalization_protocol_version": {
+          "type": "string"
+        },
+        "anchor_commits": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "content_sha256_no_whitespace": {
+          "type": "string",
+          "description": "去掉全部空白后的 sha256；存在时 delta-conflicts.py 可判定冲突是否只是空白差异"
+        }
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/definitions/IndexSchema"
+    },
+    {
+      "$ref": "#/definitions/PageSchema"
+    }
+  ]
+}
