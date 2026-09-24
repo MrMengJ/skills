@@ -18,3 +18,7 @@ Each skill directory holds a `SKILL.md` (frontmatter + instructions), optionally
 ### Documentation
 
 - **[repo-wiki](./skills/documentation/repo-wiki/SKILL.md)**: 为任意代码项目生成结构化 wiki，支持 4 类受众（维护者 / 使用者 / 新人 / 业务方）和多种项目形态。
+
+### Memory
+
+- **[agent-memory](./skills/memory/agent-memory/SKILL.md)**: 全局记忆（`~/.agents/memory/`）的维护规范：何时提议、公共还是专属、文件格式与写法要求，写完后用 `~/.agents/sync.sh` 同步到各工具。
