@@ -17,7 +17,7 @@ Each skill directory holds a `SKILL.md` (frontmatter + instructions), optionally
 
 ### Design
 
-- **[visual-companion](./skills/design/visual-companion/SKILL.md)**: 从 obra/superpowers 的 brainstorming 抽出的浏览器可视化协作工具：在本地网页里展示方案、收集用户点选，支持多轮迭代。脚本沿用原项目代码（MIT 协议，见目录内 LICENSE）。
+- **[visual-companion](./skills/design/visual-companion/SKILL.md)**: 浏览器可视化协作工具：在本地网页里展示方案、收集用户点选，支持多轮迭代。脚本基于 MIT 协议的开源代码修改，版权声明见目录内 LICENSE。
 
 ### Documentation
 

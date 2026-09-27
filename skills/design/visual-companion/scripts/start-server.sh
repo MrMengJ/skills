@@ -45,7 +45,7 @@ while [[ $# -gt 0 ]]; do
       shift 2
       ;;
     --open)
-      export BRAINSTORM_OPEN=1
+      export VISUAL_COMPANION_OPEN=1
       shift
       ;;
     --foreground|--no-daemon)
@@ -76,7 +76,7 @@ if [[ -n "$IDLE_TIMEOUT_MINUTES" ]]; then
     echo "{\"error\": \"--idle-timeout-minutes must be a positive integer\"}"
     exit 1
   fi
-  export BRAINSTORM_IDLE_TIMEOUT_MS=$(( IDLE_TIMEOUT_MINUTES * 60 * 1000 ))
+  export VISUAL_COMPANION_IDLE_TIMEOUT_MS=$(( IDLE_TIMEOUT_MINUTES * 60 * 1000 ))
 fi
 
 is_windows_like_shell() {
@@ -117,8 +117,8 @@ if [[ -n "$PROJECT_DIR" ]]; then
   SESSION_DIR="${PROJECT_DIR}/.visual-companion/${SESSION_ID}"
   # Persist the bound port and key per project so a restart reuses them and an
   # already-open browser tab reconnects to the same URL with a valid cookie.
-  export BRAINSTORM_PORT_FILE="${PROJECT_DIR}/.visual-companion/.last-port"
-  export BRAINSTORM_TOKEN_FILE="${PROJECT_DIR}/.visual-companion/.last-token"
+  export VISUAL_COMPANION_PORT_FILE="${PROJECT_DIR}/.visual-companion/.last-port"
+  export VISUAL_COMPANION_TOKEN_FILE="${PROJECT_DIR}/.visual-companion/.last-token"
 else
   SESSION_DIR="/tmp/visual-companion-${SESSION_ID}"
 fi
@@ -168,7 +168,7 @@ fi
 
 # Foreground mode for environments that reap detached/background processes.
 if [[ "$FOREGROUND" == "true" ]]; then
-  env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs "--brainstorm-server-id=$SERVER_ID" &
+  env VISUAL_COMPANION_DIR="$SESSION_DIR" VISUAL_COMPANION_HOST="$BIND_HOST" VISUAL_COMPANION_URL_HOST="$URL_HOST" VISUAL_COMPANION_OWNER_PID="$OWNER_PID" node server.cjs "--visual-companion-server-id=$SERVER_ID" &
   SERVER_PID=$!
   echo "$SERVER_PID" > "$PID_FILE"
   wait "$SERVER_PID"
@@ -177,7 +177,7 @@ fi
 
 # Start server, capturing output to log file
 # Use nohup to survive shell exit; disown to remove from job table
-nohup env BRAINSTORM_DIR="$SESSION_DIR" BRAINSTORM_HOST="$BIND_HOST" BRAINSTORM_URL_HOST="$URL_HOST" BRAINSTORM_OWNER_PID="$OWNER_PID" node server.cjs "--brainstorm-server-id=$SERVER_ID" > "$LOG_FILE" 2>&1 &
+nohup env VISUAL_COMPANION_DIR="$SESSION_DIR" VISUAL_COMPANION_HOST="$BIND_HOST" VISUAL_COMPANION_URL_HOST="$URL_HOST" VISUAL_COMPANION_OWNER_PID="$OWNER_PID" node server.cjs "--visual-companion-server-id=$SERVER_ID" > "$LOG_FILE" 2>&1 &
 SERVER_PID=$!
 disown "$SERVER_PID" 2>/dev/null
 echo "$SERVER_PID" > "$PID_FILE"

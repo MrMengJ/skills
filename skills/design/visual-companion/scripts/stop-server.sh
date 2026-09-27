@@ -43,7 +43,7 @@ command_line_for_pid() {
 command_has_server_id() {
   local pid="$1"
   local expected="$2"
-  local expected_arg="--brainstorm-server-id=$expected"
+  local expected_arg="--visual-companion-server-id=$expected"
   if [[ -r "/proc/$pid/cmdline" ]]; then
     local arg
     while IFS= read -r -d '' arg || [[ -n "$arg" ]]; do
@@ -62,7 +62,7 @@ command_has_server_id() {
 
 # Confirm a PID has this session's per-start instance id, not just a familiar
 # process name. Ambiguous or legacy metadata fails closed as stale_pid.
-is_brainstorm_server() {
+is_companion_server() {
   kill -0 "$1" 2>/dev/null || return 1
   local expected_id
   expected_id="$(read_expected_server_id)" || return 1
@@ -75,7 +75,7 @@ if [[ -f "$PID_FILE" ]]; then
 
   # Refuse to signal a PID we can't prove is our server. A stale pid file may
   # point at an unrelated process after a reboot/PID wraparound.
-  if ! is_brainstorm_server "$pid"; then
+  if ! is_companion_server "$pid"; then
     rm -f "$PID_FILE" "$SERVER_ID_FILE"
     mark_stopped "stale_pid"
     echo '{"status": "stale_pid"}'

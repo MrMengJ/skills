@@ -24,7 +24,7 @@
 
   function sessionKey() {
     try {
-      return window.sessionStorage && window.sessionStorage.getItem('brainstorm-session-key');
+      return window.sessionStorage && window.sessionStorage.getItem('visual-companion-session-key');
     } catch (e) {}
     return null;
   }
@@ -158,7 +158,7 @@
   };
 
   // Expose API for explicit use
-  window.brainstorm = {
+  window.visualCompanion = {
     send: sendEvent,
     choice: (value, metadata = {}) => sendEvent({ type: 'choice', value, ...metadata })
   };
