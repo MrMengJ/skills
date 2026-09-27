@@ -15,6 +15,10 @@ Each skill directory holds a `SKILL.md` (frontmatter + instructions), optionally
 
 ## Skills
 
+### Design
+
+- **[visual-companion](./skills/design/visual-companion/SKILL.md)**: 从 obra/superpowers 的 brainstorming 抽出的浏览器可视化协作工具：在本地网页里展示方案、收集用户点选，支持多轮迭代。脚本沿用原项目代码（MIT 协议，见目录内 LICENSE）。
+
 ### Documentation
 
 - **[repo-wiki](./skills/documentation/repo-wiki/SKILL.md)**: 为任意代码项目生成结构化 wiki，支持 4 类受众（维护者 / 使用者 / 新人 / 业务方）和多种项目形态。
