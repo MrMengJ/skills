@@ -4,7 +4,8 @@
 # Usage: serve_report.sh /absolute/path/to/report.html [/serve/root/dir]
 #
 # - Kills any previous video-lens server via PID file
-# - Starts python3 http.server in the file's directory (or explicit root)
+# - Starts serve_idle.py in the file's directory (or explicit root); it serves
+#   like python3 http.server and exits by itself after 30 idle minutes
 # - Opens the report in the default browser
 
 set -euo pipefail
@@ -30,6 +31,10 @@ fi
 DIR="$(cd "$(dirname "$HTML_PATH")" && pwd)"
 FILE="$(basename "$HTML_PATH")"
 PORT=8765
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Command-line patterns of servers this script may replace: the current
+# serve_idle.py, and the plain http.server that older versions started.
+SERVER_PATTERN='serve_idle\.py|http\.server'
 
 # Use explicit root if provided (tilde-expanded by caller), else fall back to heuristic
 if [ $# -ge 2 ]; then
@@ -52,7 +57,7 @@ if [ -f "$PID_FILE" ]; then
   if [ -n "$OLD_PID" ] && kill -0 "$OLD_PID" 2>/dev/null; then
     # Verify it's actually our http.server on this port before killing — match
     # against the full command line, not just the truncated comm name.
-    if ps -p "$OLD_PID" -o args= 2>/dev/null | grep -q "http.server.*$PORT"; then
+    if ps -p "$OLD_PID" -o args= 2>/dev/null | grep -Eq "($SERVER_PATTERN).*$PORT"; then
       kill "$OLD_PID" 2>/dev/null || true
       sleep 0.2
     fi
@@ -62,7 +67,7 @@ fi
 
 # The PID file only tracks servers started with the same cache dir. If the port
 # is still occupied (stale server from another session or cache root), take it
-# over only when it is a python http.server serving OUR directory; otherwise
+# over only when it is one of our servers serving OUR directory; otherwise
 # refuse loudly instead of letting the bind fail with an opaque
 # SERVE_PORT_FAILED. Matching $SERVE_DIR keeps the "reclaim a stale video-lens
 # session" intent while never killing an unrelated http.server the user is
@@ -70,7 +75,7 @@ fi
 LISTEN_PID="$(lsof -ti tcp:$PORT -sTCP:LISTEN 2>/dev/null | head -1 || true)"
 if [ -n "$LISTEN_PID" ]; then
   LISTEN_ARGS="$(ps -p "$LISTEN_PID" -o args= 2>/dev/null || true)"
-  if printf '%s' "$LISTEN_ARGS" | grep -q "http.server" \
+  if printf '%s' "$LISTEN_ARGS" | grep -Eq "$SERVER_PATTERN" \
      && printf '%s' "$LISTEN_ARGS" | grep -qF "$SERVE_DIR"; then
     kill "$LISTEN_PID" 2>/dev/null || true
     # Wait (up to ~2s) for the port to actually be released before binding.
@@ -86,8 +91,9 @@ fi
 
 # Start HTTP server in background and detach it from this shell so it survives
 # after the skill command exits. Log stderr/stdout so failures can be diagnosed.
-nohup python3 -m http.server "$PORT" --bind 127.0.0.1 --directory "$SERVE_DIR" \
-  >"$SERVER_LOG" 2>&1 < /dev/null &
+# It stops on its own after 30 minutes without a request (serve_idle.py).
+nohup python3 "$SCRIPT_DIR/serve_idle.py" "$PORT" --bind 127.0.0.1 --directory "$SERVE_DIR" \
+  --pid-file "$PID_FILE" >"$SERVER_LOG" 2>&1 < /dev/null &
 SERVER_PID=$!
 echo "$SERVER_PID" > "$PID_FILE"
 sleep 1

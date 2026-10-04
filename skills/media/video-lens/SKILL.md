@@ -6,7 +6,7 @@ compatibility: "Requires Python 3 and uv (the two scripts that need Python packa
 allowed-tools: Bash Read
 metadata:
   author: MrMengJ
-  version: "1.0.0"
+  version: "1.1.0"
   based-on: "kar2phi/video-lens 5.2 (commit c3f42be), MIT — see LICENSE"
 ---
 
@@ -28,7 +28,7 @@ Script invocations (the `--` guards video IDs that start with `-` — keep it):
 
 ## Bundled scripts
 
-Six local scripts ship in `./scripts/`: `preflight.py`, `fetch_transcript.py`, `fetch_metadata.py`, `transcribe_local.py`, `render_report.py`, `serve_report.sh`. `fetch_transcript.py` and `transcribe_local.py` need third-party Python packages; each declares them in an inline header and is run with `uv run`, which keeps them in uv's own cache instead of the system Python (the first run of each downloads its packages — a few seconds for the transcript fetcher, several hundred MB for local transcription). The other scripts use only the standard library and run with plain `python3`. No remote code is fetched at runtime beyond those declared packages. Network calls during a run: YouTube transcript and metadata fetches. When the local-transcription fallback runs: audio download from YouTube via yt-dlp, and a one-time Whisper model download (~1.5 GB for medium) from Hugging Face. Network calls when the user views the report in their browser: the YouTube iframe API and Google Fonts CSS.
+Seven local scripts ship in `./scripts/`: `preflight.py`, `fetch_transcript.py`, `fetch_metadata.py`, `transcribe_local.py`, `render_report.py`, `serve_report.sh`, and `serve_idle.py` (the local server that `serve_report.sh` starts — never run it directly). `fetch_transcript.py` and `transcribe_local.py` need third-party Python packages; each declares them in an inline header and is run with `uv run`, which keeps them in uv's own cache instead of the system Python (the first run of each downloads its packages — a few seconds for the transcript fetcher, several hundred MB for local transcription). The other scripts use only the standard library and run with plain `python3`. No remote code is fetched at runtime beyond those declared packages. Network calls during a run: YouTube transcript and metadata fetches. When the local-transcription fallback runs: audio download from YouTube via yt-dlp, and a one-time Whisper model download (~1.5 GB for medium) from Hugging Face. Network calls when the user views the report in their browser: the YouTube iframe API and Google Fonts CSS.
 
 ## When to Activate
 
@@ -285,7 +285,7 @@ The embedded YouTube player requires HTTP — `file://` URLs are blocked (Error 
 bash "SCRIPTS_DIR/serve_report.sh" "OUTPUT_PATH" "$HOME/Downloads/video-lens"
 ```
 
-The second argument pins the server root to `~/Downloads/video-lens` so the URL is always `http://localhost:8765/reports/<filename>.html`. The script keeps a single server running on port 8765 — all files under `~/Downloads/video-lens` (reports, gallery index, manifest) remain accessible.
+The second argument pins the server root to `~/Downloads/video-lens` so the URL is always `http://localhost:8765/reports/<filename>.html`. The server stops by itself after 30 minutes without a request, so nothing is left running once the user is done reading; a report page that is already open keeps working, and the next run of this script (or of the gallery skill) starts the server again. The script keeps a single server running on port 8765 — all files under `~/Downloads/video-lens` (reports, gallery index, manifest) remain accessible.
 
 If `serve_report.sh` emits any `ERROR:` line, or fails to print a `HTML_REPORT:` line, follow the Error Handling table and stop. Do NOT proceed to Step 6 or to the final message.
 
