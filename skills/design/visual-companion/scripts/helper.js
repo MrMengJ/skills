@@ -131,11 +131,20 @@
     const target = e.target.closest('[data-choice]');
     if (!target) return;
 
+    // 元素自己的 onclick（toggleSelect）先于这里执行，所以此时 class 已是点击后的状态
+    // 单选时切换到另一项，被顶掉的那项不会单独发事件，所以一并带上同组当前的全部选中项
+    const container = target.closest('.options') || target.closest('.cards');
+    const selection = container
+      ? Array.from(container.querySelectorAll('[data-choice].selected')).map(o => o.dataset.choice)
+      : null;
+
     sendEvent({
       type: 'click',
       text: target.textContent.trim(),
       choice: target.dataset.choice,
-      id: target.id || null
+      id: target.id || null,
+      selected: target.classList.contains('selected'),
+      selection
     });
 
   });
@@ -146,15 +155,17 @@
   window.toggleSelect = function(el) {
     const container = el.closest('.options') || el.closest('.cards');
     const multi = container && container.dataset.multiselect !== undefined;
-    if (container && !multi) {
-      container.querySelectorAll('.option, .card').forEach(o => o.classList.remove('selected'));
-    }
     if (multi) {
       el.classList.toggle('selected');
     } else {
-      el.classList.add('selected');
+      // 单选：再点已选中的这个就取消；点别的则切换过去
+      const wasSelected = el.classList.contains('selected');
+      if (container) {
+        container.querySelectorAll('.option, .card').forEach(o => o.classList.remove('selected'));
+      }
+      if (!wasSelected) el.classList.add('selected');
     }
-    window.selectedChoice = el.dataset.choice;
+    window.selectedChoice = el.classList.contains('selected') ? el.dataset.choice : null;
   };
 
   // Expose API for explicit use
