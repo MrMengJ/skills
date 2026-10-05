@@ -6,7 +6,7 @@ compatibility: "Requires Python 3 and uv (the two scripts that need Python packa
 allowed-tools: Bash Read
 metadata:
   author: MrMengJ
-  version: "1.1.0"
+  version: "1.2.0"
   based-on: "kar2phi/video-lens 5.2 (commit c3f42be), MIT — see LICENSE"
 ---
 
@@ -153,7 +153,7 @@ Translating must not blur what was said:
 
 Captions get names wrong far more often than ordinary words, and names and figures are exactly what a reader will repeat. Auto-generated captions (`CAPTION_TYPE: auto-generated`) and local transcription are the worst offenders: they split or merge tokens ("Llama 270b" for "Llama 2 70B"), spell names phonetically, and drop punctuation that separates numbers.
 
-Use the title, channel name, description, and chapter titles as the reference spelling. They were typed by the creator, so when a name in the transcript sounds like one that appears there, write it the way the creator wrote it. For a name that appears in none of them, fix it only when the context leaves no doubt about what was meant (a well-known product or person, a number whose unit makes one reading impossible); otherwise keep the transcript's form rather than guess. This is about spelling what the speaker said correctly — it does not license adding facts the speaker did not say.
+Use the title, channel name, description, and chapter titles as the reference spelling. They were typed by the creator, so when a name in the transcript sounds like one that appears there, write it the way the creator wrote it. For a name that appears in none of them, fix it only when the context leaves no doubt about what was meant (a well-known product or person, a number whose unit makes one reading impossible); otherwise keep the transcript's form rather than guess. When two or more readings fit, do not change the word and do not pass a guess on as fact: leave that item out if it is not essential; if the summary would be empty without it, write it as the captions have it and follow it with （字幕原文，写法存疑）. When a sentence's figures contradict each other, give the meaning and leave the figure out. This is about spelling what the speaker said correctly — it does not license adding facts the speaker did not say.
 
 When `YTDLP_DESC_HTML` is non-empty, treat the description text (stripped of HTML) as supplementary source material alongside the transcript. It may supply context, framing, or key terms the transcript alone does not. Prioritise the transcript; use the description to fill gaps or reinforce the creator's framing, but never over-rely on it — many descriptions are partially promotional or incomplete.
 
@@ -209,6 +209,8 @@ Rules:
   - *Dropped hedges.* 「可能并不算高」 is not 「不算高」; "at least ten years" is not "ten years"; "roughly the same" is not a figure. Keep the qualifier.
   - *Merged statements.* Figures the speaker gave for different countries, years, or cases stay separate. Do not fold them into one sentence as if they were one data point, and do not turn a few examples into a general rule the speaker did not state.
   - *Wrong speaker.* In interviews and conversations, captions rarely say who is talking. Name the person who said something only when the transcript makes it clear; otherwise say it came up in the conversation.
+  - *The speaker's own reservations.* When the speaker qualifies or pushes back on a point ("sounds reasonable, but in practice the effect is tiny"), write both halves. Keeping only the first half makes the reader overrate the claim.
+  - *Words the speaker did not use.* Do not add labels such as "counter-example", "biggest", "usually" or "all": "again, for example…" is an example, not a counter-example. A generalisation ("often", "most", "cancel each other out") may be written only if the speaker generalised that way; otherwise name the specific cases they gave, or mark it as your own inference.
 - **Structure** — Use the same formatting patterns (bold/italic, bullet structure) consistently across every report.
 - **Language fidelity** — Write in the output language set in **Output language** above. Read the transcript in its own language and translate the meaning, not word by word; keep proper nouns and direct quotes in the original as described there.
 - **Style** — Write in a clear, confident, information-dense style. Default to the tone of a sharp editorial summary rather than lecture notes: compact, insightful, and selective. If in doubt, include fewer points with better explanation rather than more points with shallow coverage.
@@ -216,6 +218,14 @@ Rules:
 #### Length adjustments
 
 Scale Summary, Key Points paragraphs, and Outline entries to the video length: 2 sentences / 1–2 / 3–6 for short (<10 min); 2–3 / 2–3 / 5–12 for medium (10–45 min); 3–4 / 3–4 / 8–15 for long (45–90 min); 3–4 / 3–4 / 10–20 for very long (>90 min). Key Point count is governed by content density (3–8 typical), not video length.
+
+#### Check the draft
+
+Before rendering, go back through the draft against the transcript, line by line rather than from memory:
+
+1. **Outline start times:** the transcript line at that time really begins the topic. A video's opening often previews what comes later, which makes it easy to date a later topic to the opening. (Chapters from yt-dlp are the creator's own and need no check.)
+2. **Strong words** ("most", "directly", "always", "all", "must"): the speaker was that strong. "应该算是最直接的" must not become "最直接的". When one sentence lists several subjects ("stocks, housing and gold all …"), confirm the speaker said it of each one; if they said different things, write them separately.
+3. **Figures, proper nouns and spelling corrections:** each can be found in the transcript (or in the title, description or chapters, for names), and none is a guess.
 
 ### 4. Render the report
 
