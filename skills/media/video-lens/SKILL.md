@@ -6,7 +6,7 @@ compatibility: "Requires Python 3 and uv (the two scripts that need Python packa
 allowed-tools: Bash Read
 metadata:
   author: MrMengJ
-  version: "1.2.0"
+  version: "1.2.2"
   based-on: "kar2phi/video-lens 5.2 (commit c3f42be), MIT — see LICENSE"
 ---
 
@@ -203,13 +203,13 @@ Rules:
 
 #### Quality Guidelines
 
-- **Accuracy** — Report what the transcript says. Do not add facts from outside knowledge or speculate about what the speaker meant. Two departures are allowed, both described above: correcting the spelling of names and numbers, and an inference of your own that is worded as yours (「由此可以推出…」) — wherever it appears, not only in the Takeaway.
+- **Accuracy** — Report what the transcript says. Do not add facts from outside knowledge or speculate about what the speaker meant. Two departures are allowed, both described above: correcting the spelling of names and numbers, and an inference of your own that is worded as yours (「由此可以推出…」) — wherever it appears, not only in the Takeaway. Explanations the speaker did not give count as outside knowledge too: do not put an expansion or gloss in brackets after an abbreviation or term (「MBS（抵押贷款支持证券）」) unless the speaker said it. Giving the original wording beside a translated term, as **Output language** describes, is not a gloss.
 - **Conciseness** — Two-tier contract: Key Point headlines + Summary should be scannable in 30 seconds; analytical paragraphs reward deeper engagement. Every sentence must earn its place.
 - **Faithfulness** — Preserve the creator's stance, tone, and emphasis; do not editorialize. Three slips do most of the damage, because each makes the summary sound surer or more specific than the speaker was:
   - *Dropped hedges.* 「可能并不算高」 is not 「不算高」; "at least ten years" is not "ten years"; "roughly the same" is not a figure. Keep the qualifier.
   - *Merged statements.* Figures the speaker gave for different countries, years, or cases stay separate. Do not fold them into one sentence as if they were one data point, and do not turn a few examples into a general rule the speaker did not state.
   - *Wrong speaker.* In interviews and conversations, captions rarely say who is talking. Name the person who said something only when the transcript makes it clear; otherwise say it came up in the conversation.
-  - *The speaker's own reservations.* When the speaker qualifies or pushes back on a point ("sounds reasonable, but in practice the effect is tiny"), write both halves. Keeping only the first half makes the reader overrate the claim.
+  - *The speaker's own reservations.* When the speaker qualifies or pushes back on a point ("sounds reasonable, but in practice the effect is tiny"), write both halves. Keeping only the first half makes the reader overrate the claim. Do not drop a reservation because its target is hard to pin down: when it sits right after the point it qualifies, attach it to that point. Only if the placement is genuinely unclear, keep it and say so ("a remark that, going by where it falls, qualifies the point above") rather than leave it out.
   - *Words the speaker did not use.* Do not add labels such as "counter-example", "biggest", "usually" or "all": "again, for example…" is an example, not a counter-example. A generalisation ("often", "most", "cancel each other out") may be written only if the speaker generalised that way; otherwise name the specific cases they gave, or mark it as your own inference.
 - **Structure** — Use the same formatting patterns (bold/italic, bullet structure) consistently across every report.
 - **Language fidelity** — Write in the output language set in **Output language** above. Read the transcript in its own language and translate the meaning, not word by word; keep proper nouns and direct quotes in the original as described there.
@@ -217,7 +217,7 @@ Rules:
 
 #### Length adjustments
 
-Scale Summary, Key Points paragraphs, and Outline entries to the video length: 2 sentences / 1–2 / 3–6 for short (<10 min); 2–3 / 2–3 / 5–12 for medium (10–45 min); 3–4 / 3–4 / 8–15 for long (45–90 min); 3–4 / 3–4 / 10–20 for very long (>90 min). Key Point count is governed by content density (3–8 typical), not video length.
+Scale Summary, Key Points paragraphs, and Outline entries to the video length: 2 sentences / 1–2 / 3–6 for short (<10 min); 2–3 / 2–3 / 5–12 for medium (10–45 min); 3–4 / 3–4 / 8–15 for long (45–90 min); 3–4 / 3–4 / 10–20 for very long (>90 min). Key Point count is governed by content density (3–8 typical), not video length. The Outline ranges are typical, not caps: a video that really has more topics may exceed them, but do not split one topic into pieces to pad the count.
 
 #### Check the draft
 
@@ -225,7 +225,7 @@ Before rendering, go back through the draft against the transcript, line by line
 
 1. **Outline start times:** the transcript line at that time really begins the topic. A video's opening often previews what comes later, which makes it easy to date a later topic to the opening. (Chapters from yt-dlp are the creator's own and need no check.)
 2. **Strong words** ("most", "directly", "always", "all", "must"): the speaker was that strong. "应该算是最直接的" must not become "最直接的". When one sentence lists several subjects ("stocks, housing and gold all …"), confirm the speaker said it of each one; if they said different things, write them separately.
-3. **Figures, proper nouns and spelling corrections:** each can be found in the transcript (or in the title, description or chapters, for names), and none is a guess.
+3. **Figures, proper nouns, spelling corrections and quotations:** each figure and name can be found in the transcript (or in the title, description or chapters, for names), and none is a guess. Every phrase inside quotation marks appears word for word in the transcript; a paraphrase must not wear quotation marks.
 
 ### 4. Render the report
 
