@@ -26,6 +26,7 @@ Each skill directory holds a `SKILL.md` (frontmatter + instructions), optionally
 ### Media
 
 - **[video-lens](./skills/media/video-lens/SKILL.md)**: 总结 YouTube 视频：取视频原语言的字幕（没有字幕时可在本机转写），用中文写摘要、要点和带时间戳的大纲，生成带内嵌播放器的网页报告。基于 MIT 协议的 [kar2phi/video-lens](https://github.com/kar2phi/video-lens) 修改，版权声明见目录内 LICENSE。
+- **[bilibili-lens](./skills/media/bilibili-lens/SKILL.md)**: 总结哔哩哔哩视频：不登录账号，下载音频后在本机转写（仅支持 Apple 芯片的 Mac），校对同音字错误，用中文写摘要、要点和带时间点的大纲，存成 Markdown。支持多集视频和 b23.tv 短链；输出不进 video-lens-gallery 的图库。部分写法参考 MIT 协议的 [kar2phi/video-lens](https://github.com/kar2phi/video-lens)，版权声明见目录内 LICENSE。
 - **[video-lens-gallery](./skills/media/video-lens-gallery/SKILL.md)**: video-lens 的配套图库：浏览、搜索已保存的视频报告，重建报告索引。来自 [kar2phi/video-lens](https://github.com/kar2phi/video-lens)，未修改，版权声明见目录内 LICENSE。
 
 ### Memory
