@@ -26,11 +26,10 @@ CLOSING = """## 收尾（固定段，禁止修改）
 1. 拷贝 plan 文件到 design-notes/v{{NEW_VERSION}}-{{TOPIC_SLUG}}.md
 2. 更新 design-notes/INDEX.md
 3. 更新 SKILL.md 顶部 <!-- skill-version: {{NEW_VERSION}} -->
-4. 重算 content-hash，更新 CHANGELOG.md 顶部 <!-- skill-content-hash: ... -->
-5. 在 CHANGELOG.md 写新版本条目
-6. 运行 scripts/design-notes-lint.py + scripts/skill-self-check.py
-7. 用户文档审查（scripts/docs-drift-helper.py），三选一：已无需更新 / 已更新 / 写入 .upgrade/docs-followup.md
-8. （可选）git add -A && git commit -m "chore(skill): upgrade to v{{NEW_VERSION}} — {{TOPIC_SLUG}}"
+4. 在 CHANGELOG.md 写新版本条目
+5. 运行 scripts/design-notes-lint.py + scripts/skill-self-check.py
+6. 用户文档审查（scripts/docs-drift-helper.py），三选一：已无需更新 / 已更新 / 写入 .upgrade/docs-followup.md
+7. （可选）git add -A && git commit -m "chore(skill): upgrade to v{{NEW_VERSION}} — {{TOPIC_SLUG}}"
 """
 
 

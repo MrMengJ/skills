@@ -11,7 +11,7 @@
 | wiki-stats.py | 输出 wiki 统计信息（含逐页字数核对） | `python3 wiki-stats.py --wiki-root <path> [--min-chars 1800] [--per-page]` |
 | diff-impact.py | `delta-git.py affected-pages` 的人类可读包装（同样的反向映射，输出给人看而非 JSON） | `python3 diff-impact.py --meta-dir <path> --base <commit>` |
 | migrate-meta.py | 迁移 .wiki-meta schema 版本；v1→v2 拆文件（`--meta-file`），v2→v2 就地补缺省字段（`--meta-dir`） | `python3 migrate-meta.py --from-version 1 --to-version 2 --meta-file <path>` |
-| skill-self-check.py | 检查 skill 内容 hash 是否与 CHANGELOG 一致 | `python3 skill-self-check.py --skill-root <path>` |
+| skill-self-check.py | 检查 SKILL.md 版本号是否与 CHANGELOG 最新条目一致 | `python3 skill-self-check.py --skill-root <path>` |
 | design-notes-lint.py | 校验 design-notes/ 目录结构 | `python3 design-notes-lint.py --skill-root <path>` |
 | docs-drift-helper.py | 展示升级影响的文档文件清单 | `python3 docs-drift-helper.py --skill-root <path>` |
 | release-finalize.sh | 执行 skill 升级收尾操作 | `./release-finalize.sh --plan <path> --new-version <ver> --topic-slug <slug>` |

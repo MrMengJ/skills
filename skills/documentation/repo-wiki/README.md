@@ -27,7 +27,6 @@ cd <你的项目>
 | `/repo-wiki --from <commit>` | 覆盖增量起点（早于上次同步时会警告并默认 dry-run） |
 | `/repo-wiki --platform=tier1/2/3` | 强制交互层级 |
 | `/repo-wiki --upgrade` | 升级 skill 自身（plan 模式 / 对话 / CLI 三档） |
-| `/repo-wiki --upgrade --recover` | 手改 SKILL.md 后只补 hash / CHANGELOG / design-notes |
 | `/repo-wiki --help` | 打印 `scripts/help.py` 的帮助 |
 
 ## 平台支持
@@ -62,10 +61,10 @@ cd <你的项目>
 | `references/` | 决策点 UI 文本、四份页面模板、agent prompt 规范、Phase Δ 协议、meta schema 与字段速查、章节规划启发式、SKILL_ROOT 协议、模板复用矩阵、用户偏好 |
 | `scripts/` | 15 个辅助脚本（见 `scripts/README.md`） |
 | `docs/usage.md` | 使用手册：参数表、决策点、Phase Δ 分流、故障排查 |
-| `docs/maintainers.md` | 维护手册：升级流程、收尾固定段、hash 协议、兼容矩阵 |
+| `docs/maintainers.md` | 维护手册：升级流程、收尾固定段、兼容矩阵 |
 | `design-notes/` | 每次升级的 plan 存档（`v<版本>-<主题>.md`）与 `INDEX.md` |
 | `.upgrade/` | `--upgrade` 的中间产物（pending plan、docs-followup） |
-| `CHANGELOG.md` | 版本记录；顶部 `<!-- skill-content-hash -->` 供自检 |
+| `CHANGELOG.md` | 版本记录；最新条目的版本号供自检比对 |
 
 ## 安装
 

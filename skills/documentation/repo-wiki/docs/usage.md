@@ -14,7 +14,6 @@
 | `--from <commit>` | 覆盖 `last_synced_commit` 作为增量起点；早于上次同步时显式警告，默认转 dry-run |
 | `--platform=tier1/2/3` | 强制交互层级（结构化工具 / 文本选项 / 纯 CLI），跳过能力探测 |
 | `--upgrade` | 升级 skill 自身：Level 1 plan 模式 / Level 2 对话收集 / Level 3 `scripts/upgrade-cli.py` |
-| `--upgrade --recover` | 手改 SKILL.md 后只运行收尾固定段补 hash / CHANGELOG / design-notes |
 | `--help`, `-h` | 打印帮助后退出，不进入任何 Phase |
 <!-- HELP-PARAM-END -->
 
@@ -22,7 +21,7 @@
 
 ## § 1 首次生成流程
 
-1. **开场卡片**：打印 4 件事与元命令提示；`skill-self-check.py` 自动运行，hash 漂移时追加一行警告（不阻断）。
+1. **开场卡片**：打印 4 件事与元命令提示；`skill-self-check.py` 自动运行，SKILL.md 版本号与 CHANGELOG 最新条目不一致时追加一行警告（不阻断）。
 2. **静默调研**：探测命令在内部跑，只展示摘要卡（类型 / 入口 / fork / 规模）。检测到 ≥2 种语言信号时必须问「单语言 + 工具链 / 多语言 monorepo / 多服务集群」。
 3. **决策点**（完整 UI 文本见 `references/decision-points.md`）：
 
@@ -86,17 +85,17 @@ python3 $SKILL_ROOT/scripts/wiki-stats.py       --wiki-root $WIKI_ROOT --min-cha
 | `diff-impact.py` | `--meta-dir --base [--head] [--repo-root]` | affected-pages 的人类可读版 |
 | `migrate-meta.py` | `--from-version 1 --to-version 2 --meta-file …`；`--from-version 2 --to-version 2 --meta-dir …` | v1 单文件 → v2 拆文件；v2 就地补缺省字段 |
 | `help.py` | `[--skill-root]` | 版本号读 SKILL.md；参数表读本文 § 0 |
-| `skill-self-check.py` | `--skill-root [--print-hash] [--strict]` | 见 `docs/maintainers.md` hash 协议 |
+| `skill-self-check.py` | `--skill-root [--strict]` | 比对 SKILL.md 版本号与 CHANGELOG 最新条目 |
 | `design-notes-lint.py` | `--skill-root` | INDEX 登记、命名、四小节 |
-| `docs-drift-helper.py` | `--skill-root [--plan] [--followup "…"]` | 收尾第 7 步 |
+| `docs-drift-helper.py` | `--skill-root [--plan] [--followup "…"]` | 收尾第 6 步 |
 | `upgrade-cli.py` | `--interactive` / `--no-prompt --from-json` | Level 3 入口 |
-| `release-finalize.sh` | `--plan --new-version --topic-slug [--commit] [--summary]`；`--recover` | 收尾固定段 8 步 |
+| `release-finalize.sh` | `--plan --new-version --topic-slug [--commit] [--summary]` | 收尾固定段 7 步 |
 
 ## § 4 故障排查
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
-| 开场卡片下出现「skill 内容已变更但 CHANGELOG 未更新」 | 直接改了 SKILL.md / references / scripts 没走 `--upgrade` | `/repo-wiki --upgrade --recover` 或 `scripts/release-finalize.sh --recover` |
+| 开场卡片下出现「SKILL.md 版本号与 CHANGELOG 不一致」 | 手改了 SKILL.md 的版本号或 CHANGELOG，没走 `--upgrade` | 把两处版本号改成一致；发新版本走 `/repo-wiki --upgrade` |
 | `validate` 报 `missing_source_file` 且 path 是目录名 | 某页 `source_files[].path` 写成了目录或非字符串 | 按提示选 typo 修正该页 json；目录路径无法参与 diff 反向映射 |
 | 首次 `--update` 把所有页都报成「手动改动冲突」 | 页面 sha256 是自行实现 normalize 算的，与脚本口径不一致 | 用 `delta-conflicts.py hash --file <页.md>` 逐页重算并 `update-page` 回填；以后一律用脚本取值 |
 | 某一章永远不出现在受影响列表里 | 该页 primary `source_files` 写的是目录 | v2.1.4 起 `validate` 会报 `source_is_directory`；把目录展开成驱动这一页内容的 1-3 个具体文件 |

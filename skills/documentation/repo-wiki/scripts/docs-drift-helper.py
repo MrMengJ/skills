@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""展示本次升级可能影响的用户文档清单，辅助「收尾第 7 步：用户文档审查」。
+"""展示本次升级可能影响的用户文档清单，辅助「收尾第 6 步：用户文档审查」。
 
 用法：python3 docs-drift-helper.py --skill-root <path> [--plan <path>] [--followup "<待办文本>"]
 

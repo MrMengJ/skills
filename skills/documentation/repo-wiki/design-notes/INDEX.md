@@ -13,3 +13,4 @@
 | 2.1.4 | source-path-and-hash-contract | [v2.1.4-source-path-and-hash-contract.md](v2.1.4-source-path-and-hash-contract.md) | 2026-09-05 |
 | 2.1.5 | role-alias-and-source-root | [v2.1.5-role-alias-and-source-root.md](v2.1.5-role-alias-and-source-root.md) | 2026-09-05 |
 | 2.1.6 | scale-aware-thresholds-and-hit-reasons | [v2.1.6-scale-aware-thresholds-and-hit-reasons.md](v2.1.6-scale-aware-thresholds-and-hit-reasons.md) | 2026-09-05 |
+| 2.1.7 | manual-trigger-and-drop-content-hash | [v2.1.7-manual-trigger-and-drop-content-hash.md](v2.1.7-manual-trigger-and-drop-content-hash.md) | 2026-10-11 |

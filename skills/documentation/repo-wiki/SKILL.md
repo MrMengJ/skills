@@ -1,13 +1,13 @@
 ---
 name: repo-wiki
-description: 为任意代码项目生成结构化 wiki 的 AI agent skill。支持 4 类受众（维护者 / 使用者 / 新人 / 业务方）和多种项目形态（前端库 / 后端服务 / CLI / SDK / 单体业务 / 多语言 monorepo / 微服务集群 / fork 项目）。 Triggers on: "为这个仓库生成 wiki"、"生成代码文档"、"给 SDK 写 API 文档"、 "给新人写代码导览"、"给业务方讲清楚这个系统"、"document this codebase"、 "generate API docs for this library"、"write a contributor guide"、 "generate a repo wiki"、"帮我做文档"、"写一个 wiki"，or any request to create structured documentation covering architecture, APIs, business flows, or onboarding paths for a code project. Especially useful for repositories with complex internal mechanics that need systematic documentation across multiple audiences.
+description: '为任意代码项目生成结构化 wiki。支持 4 类受众（维护者 / 使用者 / 新人 / 业务方）和多种项目形态（前端库 / 后端服务 / CLI / SDK / 单体业务 / 多语言 monorepo / 微服务集群 / fork 项目）。'
+disable-model-invocation: true
 ---
 
-<!-- skill-version: 2.1.6 -->
-<!-- skill-content-hash: PLACEHOLDER -->
+<!-- skill-version: 2.1.7 -->
 <!-- skill-root-protocol: v1 -->
 
-# Repo Wiki Generator v2.1.6
+# Repo Wiki Generator v2.1.7
 
 ---
 
@@ -72,13 +72,13 @@ description: 为任意代码项目生成结构化 wiki 的 AI agent skill。支�
 
 ## --upgrade 分支（升级 skill 自身）
 
-触发词：`/repo-wiki --upgrade` 或 `--upgrade --recover`
+触发词：`/repo-wiki --upgrade`
 
 ### 三档执行路径
 
 调度器检测平台能力，按能力自动降级：
 
-**Level 1（有 plan 模式，如 Claude Code）**：进入 plan 模式 → 收集需求生成 plan → ExitPlanMode → 执行主体 → 收尾固定段（8 步）
+**Level 1（有 plan 模式，如 Claude Code）**：进入 plan 模式 → 收集需求生成 plan → ExitPlanMode → 执行主体 → 收尾固定段（7 步）
 
 **Level 2（有对话能力，无 plan 模式，如 Cursor / Cline / Continue）**：
 1. 向用户展示问题框架（改造背景 / 目标 / 文档影响分析 / 主体步骤），逐项收集答案
@@ -103,20 +103,15 @@ description: 为任意代码项目生成结构化 wiki 的 AI agent skill。支�
 ## 收尾（固定段，禁止修改）
 ```
 
-### 收尾固定段（8 步，所有 Level 均执行）
+### 收尾固定段（7 步，所有 Level 均执行）
 
 1. 拷贝 plan 文件到 `design-notes/v{{NEW_VERSION}}-{{TOPIC_SLUG}}.md`
 2. 更新 `design-notes/INDEX.md`
 3. 更新 SKILL.md 顶部 `<!-- skill-version: {{NEW_VERSION}} -->`（脚本按正则替换，不要写死某个版本号）
-4. 重算 content-hash，更新 CHANGELOG.md 顶部 `<!-- skill-content-hash: ... -->`
-5. 在 CHANGELOG.md 写新版本条目
-6. 运行 `scripts/design-notes-lint.py` + `scripts/skill-self-check.py`
-7. 用户文档审查（`scripts/docs-drift-helper.py`），三选一：已无需更新 / 已更新 / 写入 `.upgrade/docs-followup.md`
-8. （可选）`git add -A && git commit -m "chore(skill): upgrade to v{{NEW_VERSION}} — {{TOPIC_SLUG}}"`
-
-### `--upgrade --recover`（仅补元数据）
-
-维护者直接编辑 SKILL.md 未走 `--upgrade` 时，`skill-self-check.py` 检测到 hash 漂移，开场卡片提示 `⚠️ skill 内容已变更但 CHANGELOG 未更新`。`--recover` 模式：跳过 plan 主体，**只**运行收尾固定段补全 hash/CHANGELOG/design-notes。
+4. 在 CHANGELOG.md 写新版本条目
+5. 运行 `scripts/design-notes-lint.py` + `scripts/skill-self-check.py`
+6. 用户文档审查（`scripts/docs-drift-helper.py`），三选一：已无需更新 / 已更新 / 写入 `.upgrade/docs-followup.md`
+7. （可选）`git add -A && git commit -m "chore(skill): upgrade to v{{NEW_VERSION}} — {{TOPIC_SLUG}}"`
 
 ---
 
@@ -128,7 +123,7 @@ description: 为任意代码项目生成结构化 wiki 的 AI agent skill。支�
 
 **非交互模式**：与 Phase 0 一致——答案已在上下文里就不再逐项询问，只在 Δ.0 复述一次。Δ.-1 与 Δ.5 的确认在非交互下取默认值（`missing_source_file` / `source_is_directory` 取 skip，总体决策取「逐组确认」的只读部分），并把每一处所取的默认值写进最终报告。
 
-**`--dry-run` 的边界**：Δ.-1 到 Δ.6 与 Δ.8 都是只读的，照常执行并汇报（用户问「会改哪些页」时通常也想知道新出现的未覆盖模块）；Δ.7 重写与 Δ.9 收尾跳过，`runtime.json` 不刷新。`skill-self-check.py` 在 Phase Δ 开头跑一次，只在卡片里提示 hash 漂移，不阻断。
+**`--dry-run` 的边界**：Δ.-1 到 Δ.6 与 Δ.8 都是只读的，照常执行并汇报（用户问「会改哪些页」时通常也想知道新出现的未覆盖模块）；Δ.7 重写与 Δ.9 收尾跳过，`runtime.json` 不刷新。`skill-self-check.py` 在 Phase Δ 开头跑一次，只在卡片里提示版本号不一致，不阻断。
 
 | 步骤 | 要点 |
 |---|---|
@@ -151,7 +146,7 @@ description: 为任意代码项目生成结构化 wiki 的 AI agent skill。支�
 ### 开场卡片（Phase 0 第一段输出，必须在任何探测命令之前打印）
 
 ```
-🪄 /repo-wiki v2.1.6
+🪄 /repo-wiki v2.1.7
 即将做 4 件事（你可随时输入 cancel 退出）：
   1. 静默调研项目（约 30 秒，外露摘要卡）
   2. 问你 5 个决策点（受众 / 语言 / 章节 / 输出位置 / 图表）
@@ -162,7 +157,7 @@ description: 为任意代码项目生成结构化 wiki 的 AI agent skill。支�
 任何时候输入 ? 查看帮助 | back 回上步 | cancel 取消
 ```
 
-`python3 $SKILL_ROOT/scripts/skill-self-check.py --skill-root $SKILL_ROOT` 在此处自动运行：如发现 content-hash 漂移，在卡片下方追加 `⚠️ skill 内容已变更但 CHANGELOG 未更新`（不阻断 wiki 生成）。
+`python3 $SKILL_ROOT/scripts/skill-self-check.py --skill-root $SKILL_ROOT` 在此处自动运行：如发现 SKILL.md 版本号与 CHANGELOG 最新条目不一致，在卡片下方追加 `⚠️ SKILL.md 版本号与 CHANGELOG 不一致`（不阻断 wiki 生成）。
 
 ### 静默调研（内部执行，不外露命令输出）
 

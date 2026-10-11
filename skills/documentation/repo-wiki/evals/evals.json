@@ -37,7 +37,7 @@
     {
       "id": 2,
       "prompt": "我记得 repo-wiki 这个 skill 有个 --help，帮我看看 /repo-wiki --help 会输出什么、都支持哪些参数，把完整输出保存到 OUTPUTS/help.txt，不要开始生成任何 wiki。",
-      "expected_output": "help.txt 含版本号 v2.1.0、命令用法、参数表（--update / --rebuild / --dry-run / --from / --platform / --upgrade / --recover / --help）、元命令说明；没有进入 Phase 0，没有写其他文件",
+      "expected_output": "help.txt 含版本号 v2.1.0、命令用法、参数表（--update / --rebuild / --dry-run / --from / --platform / --upgrade / --help）、元命令说明；没有进入 Phase 0，没有写其他文件",
       "files": [],
       "expectations": [
         "help.txt 存在且含 SKILL.md 当前的版本号（<!-- skill-version -->）",

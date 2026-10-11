@@ -1,8 +1,21 @@
-<!-- skill-content-hash: 63f9be9a0e89f062 -->
 # Changelog
 
 All notable changes to the `repo-wiki` skill will be documented in this file.
 版本日期以本机 Claude Code 会话记录、生成产物中的 `runtime.json` / `HOW-TO-UPDATE.md` 为准。
+
+## [2.1.7] - 2026-10-11
+### Fixed
+- `SKILL.md` 文件头的 `description` 没加引号，内容里的 `Triggers on: "…"` 含「冒号 + 空格」，严格的 YAML 解析器会报 `mapping values are not allowed in this context`，Zed 因此提示 `Invalid YAML frontmatter`、加载失败。Claude Code 的解析较宽松，一直能正常加载。
+- `release-finalize.sh --help` 会在用法注释之后多打印几行脚本代码。
+### Changed
+- **改为手动触发**：文件头新增 `disable-model-invocation: true`，只有输入 `/repo-wiki` 才会启动，不再根据对话内容自动触发。`description` 相应去掉触发短语，只保留用途、受众和支持的项目形态。
+- `skill-self-check.py` 只比对 `SKILL.md` 的版本号与 CHANGELOG 最新条目，提示文案改为「SKILL.md 版本号与 CHANGELOG 不一致」。手改 skill 文件不再触发警告。
+- 收尾固定段从 8 步减为 7 步（去掉「重算 content-hash」），`SKILL.md`、docs 与脚本里的步骤编号同步。
+### Removed
+- **内容 hash 机制**：不再把 `SKILL.md + references/** + scripts/**` 算成指纹存进 `CHANGELOG.md` 顶部。它唯一的产出是开场卡片上一行不阻断的警告，代价是每次手改都要多跑一步收尾；skill 放在 git 仓库里由单人维护，改没改过 git 就能看到。一并删除：`CHANGELOG.md` 顶部的 `<!-- skill-content-hash -->`、`SKILL.md` 顶部没有任何脚本读取的 `PLACEHOLDER` 占位行、`skill-self-check.py --print-hash`、维护手册的 hash 协议一节。
+- **`--upgrade --recover`**：它主要用来在手改后刷新 hash，hash 去掉后只剩补一条 CHANGELOG 条目。`release-finalize.sh` 现在必须带 `--plan --new-version --topic-slug`。
+### Evals
+- 本版改动未经 eval 验证；生成 wiki 的流程、模板和 schema 没有改动。
 
 ## [2.1.6] - 2026-09-05
 ### Fixed

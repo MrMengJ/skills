@@ -21,7 +21,6 @@ BUILTIN_PARAMS = """\
 | --from <commit> | 覆盖 last_synced_commit 作为增量起点（早于上次同步时会警告） |
 | --platform=tier1/2/3 | 强制指定交互层级（结构化工具 / 文本 / 纯 CLI） |
 | --upgrade | 升级 skill 自身（plan 模式 / 对话 / CLI 三档） |
-| --upgrade --recover | 只补 hash / CHANGELOG / design-notes 元数据，不走 plan |
 | --help, -h | 显示本帮助 |"""
 
 
@@ -61,7 +60,7 @@ def main():
     print(f"""🪄 /repo-wiki v{version} — 为任意代码项目生成结构化 wiki
 
 用法：/repo-wiki [--update | --rebuild | --dry-run] [--from <commit>] [--platform=tierN]
-      /repo-wiki --upgrade [--recover]
+      /repo-wiki --upgrade
       /repo-wiki --help
 
 {params}

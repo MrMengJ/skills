@@ -10,10 +10,8 @@
 | `references/*.md` | 决策点文案、模板、协议变化 | 同上（模板改动要升 `template-version`） |
 | `references/meta-schema.json` | schema 字段变化 | 同上，且要升 `schema_version` + 写迁移脚本 |
 | `scripts/*` | 接口或行为变化 | 同上；改接口必须同步 `scripts/README.md` 与 `docs/usage.md` § 3 |
-| `README.md` / `docs/usage.md` / `docs/maintainers.md` | 用户可见行为变化 | 收尾第 7 步审查 |
+| `README.md` / `docs/usage.md` / `docs/maintainers.md` | 用户可见行为变化 | 收尾第 6 步审查 |
 | `CHANGELOG.md` / `design-notes/` | 每次升级 | `release-finalize.sh` 自动 |
-
-内容 hash 覆盖 `SKILL.md + references/** + scripts/**`；README / docs / CHANGELOG / design-notes 不计入。
 
 ## 2. 升级流程（`/repo-wiki --upgrade`）
 
@@ -40,7 +38,7 @@
 
 `design-notes-lint.py` 检查前四节是否齐全。
 
-### 收尾固定段（8 步，`scripts/release-finalize.sh` 是单一可信源）
+### 收尾固定段（7 步，`scripts/release-finalize.sh` 是单一可信源）
 
 ```bash
 scripts/release-finalize.sh --plan <plan.md> --new-version 2.2.0 --topic-slug add-go-support [--summary "一句话"] [--commit]
@@ -49,26 +47,15 @@ scripts/release-finalize.sh --plan <plan.md> --new-version 2.2.0 --topic-slug ad
 1. 拷贝 plan → `design-notes/v<版本>-<slug>.md`
 2. 追加 `design-notes/INDEX.md` 一行
 3. 更新 `SKILL.md` 顶部 `<!-- skill-version -->`（以及标题 / 开场卡片中的版本号）
-4. `skill-self-check.py --print-hash` 重算 hash → 写 `CHANGELOG.md` 顶部
-5. `CHANGELOG.md` 插入 `## [版本] - 日期` 条目（已存在则跳过；`--summary` 作为首条）
-6. `design-notes-lint.py` + `skill-self-check.py --strict`
-7. `docs-drift-helper.py --plan <plan>`：三选一「已无需更新 / 已更新 / `--followup` 写入 `.upgrade/docs-followup.md`」
-8. `--commit` 时 `git add -A && git commit -m "chore(skill): upgrade to v<版本> — <slug>"`（skill 目录非 git 仓库则跳过）
+4. `CHANGELOG.md` 插入 `## [版本] - 日期` 条目（已存在则跳过；`--summary` 作为首条）
+5. `design-notes-lint.py` + `skill-self-check.py --strict`
+6. `docs-drift-helper.py --plan <plan>`：三选一「已无需更新 / 已更新 / `--followup` 写入 `.upgrade/docs-followup.md`」
+7. `--commit` 时 `git add -A && git commit -m "chore(skill): upgrade to v<版本> — <slug>"`（skill 目录非 git 仓库则跳过）
 
-### `--recover`
+## 3. 版本号自检
 
-直接改了 SKILL.md 没走 `--upgrade` → 开场卡片提示漂移 → `scripts/release-finalize.sh --recover` 只跑第 4–7 步（版本号沿用 SKILL.md 现值，CHANGELOG 已有该版本条目则不新增）。
-
-## 3. 内容 hash 协议（v1）
-
-```
-hash = sha256( Σ_{文件按路径排序} "<相对路径>\n<内容(剔除 skill-content-hash 行)>\n" )[:16]
-文件范围 = SKILL.md + references/** + scripts/**（跳过 __pycache__）
-```
-
-- 记录位置：`CHANGELOG.md` 顶部 `<!-- skill-content-hash: <16hex> -->`；`SKILL.md` 顶部同名行保持 `PLACEHOLDER`（原版即如此，避免自引用）。
-- `skill-self-check.py` 同时比对 `SKILL.md` 的 `skill-version` 与 CHANGELOG 最新条目版本号。
-- 默认不阻断 wiki 生成；只有 `--strict`（收尾第 6 步）才返回非 0。
+- `skill-self-check.py` 比对 `SKILL.md` 的 `skill-version` 与 CHANGELOG 最新条目版本号。
+- 默认不阻断 wiki 生成；只有 `--strict`（收尾第 5 步）才返回非 0。
 
 ## 4. 版本与兼容矩阵
 
