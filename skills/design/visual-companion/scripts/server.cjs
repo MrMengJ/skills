@@ -328,7 +328,6 @@ function handleRequest(req, res) {
     res.end(FORBIDDEN_PAGE);
     return;
   }
-  touchActivity(); // only authorized requests count as activity
 
   // Mirror the key into a cookie so same-origin subresources (/files/*) can
   // authenticate after bootstrap. HttpOnly keeps it away from page scripts; the
@@ -446,7 +445,6 @@ function handleMessage(text) {
     console.error('Failed to parse WebSocket message:', e.message);
     return;
   }
-  touchActivity();
   console.log(JSON.stringify({ source: 'user-event', ...event }));
   if (event && event.choice) {
     const eventsFile = path.join(STATE_DIR, 'events');
@@ -485,25 +483,14 @@ function maybeOpenBrowser() {
   try { cp.execFile(launcher.bin, launcher.args, () => {}); } catch (e) { /* best effort */ }
 }
 
-// ========== Activity Tracking ==========
+// ========== Lifecycle ==========
 
-// Idle timeout: shut down after this long with no activity. Default 4 hours;
-// override with VISUAL_COMPANION_IDLE_TIMEOUT_MS (start-server.sh: --idle-timeout-minutes).
-const IDLE_TIMEOUT_MS = (() => {
-  const ms = Number(process.env.VISUAL_COMPANION_IDLE_TIMEOUT_MS);
-  return Number.isFinite(ms) && ms > 0 ? ms : 4 * 60 * 60 * 1000;
-})();
-// How often the watchdog checks for owner-death / idleness. Configurable mainly
-// so tests can run fast; production default is 60s.
+// How often the watchdog checks for owner-death. Configurable mainly so tests
+// can run fast; production default is 60s.
 const LIFECYCLE_CHECK_MS = (() => {
   const ms = Number(process.env.VISUAL_COMPANION_LIFECYCLE_CHECK_MS);
   return Number.isFinite(ms) && ms > 0 ? ms : 60 * 1000;
 })();
-let lastActivity = Date.now();
-
-function touchActivity() {
-  lastActivity = Date.now();
-}
 
 // ========== File Watching ==========
 
@@ -534,7 +521,6 @@ function startServer() {
       const filePath = path.join(CONTENT_DIR, filename);
 
       if (!fs.existsSync(filePath)) return; // file was deleted
-      touchActivity();
 
       if (!knownFiles.has(filename)) {
         knownFiles.add(filename);
@@ -574,16 +560,16 @@ function startServer() {
     try { process.kill(ownerPid, 0); return true; } catch (e) { return e.code === 'EPERM'; }
   }
 
-  // Periodically exit if the owner process died or we've been idle too long.
+  // Periodically exit if the owner process died. There is deliberately no idle
+  // timeout: a page the user left open must keep working however long it sits.
   const lifecycleCheck = setInterval(() => {
     if (!ownerAlive()) shutdown('owner process exited');
-    else if (Date.now() - lastActivity > IDLE_TIMEOUT_MS) shutdown('idle timeout');
   }, LIFECYCLE_CHECK_MS);
   lifecycleCheck.unref();
 
   // Validate owner PID at startup. If it's already dead, the PID resolution
   // was wrong (common on WSL, Tailscale SSH, and cross-user scenarios).
-  // Disable monitoring and rely on the idle timeout instead.
+  // Disable monitoring; the server then runs until stop-server.sh kills it.
   if (ownerPid) {
     try { process.kill(ownerPid, 0); }
     catch (e) {
@@ -619,7 +605,7 @@ function startServer() {
     const info = JSON.stringify({
       type: 'server-started', port: Number(PORT), host: HOST,
       url_host: URL_HOST, url: companionUrl(),
-      screen_dir: CONTENT_DIR, state_dir: STATE_DIR, idle_timeout_ms: IDLE_TIMEOUT_MS
+      screen_dir: CONTENT_DIR, state_dir: STATE_DIR
     });
     console.log(info);
     // server-info embeds the key — keep it owner-only.

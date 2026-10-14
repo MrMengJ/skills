@@ -11,7 +11,6 @@
 #   --host <bind-host>    Host/interface to bind (default: 127.0.0.1).
 #                         Use 0.0.0.0 in remote/containerized environments.
 #   --url-host <host>     Hostname shown in returned URL JSON.
-#   --idle-timeout-minutes <n>  Shut down after n minutes idle (default 240 = 4h).
 #   --open                Auto-open the browser on the first screen (use only
 #                         after the user approves the visual companion).
 #   --foreground          Run server in the current terminal (no backgrounding).
@@ -25,7 +24,6 @@ FOREGROUND="false"
 FORCE_BACKGROUND="false"
 BIND_HOST="127.0.0.1"
 URL_HOST=""
-IDLE_TIMEOUT_MINUTES=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --project-dir)
@@ -38,10 +36,6 @@ while [[ $# -gt 0 ]]; do
       ;;
     --url-host)
       URL_HOST="$2"
-      shift 2
-      ;;
-    --idle-timeout-minutes)
-      IDLE_TIMEOUT_MINUTES="$2"
       shift 2
       ;;
     --open)
@@ -69,14 +63,6 @@ if [[ -z "$URL_HOST" ]]; then
   else
     URL_HOST="$BIND_HOST"
   fi
-fi
-
-if [[ -n "$IDLE_TIMEOUT_MINUTES" ]]; then
-  if ! [[ "$IDLE_TIMEOUT_MINUTES" =~ ^[0-9]+$ ]] || [[ "$IDLE_TIMEOUT_MINUTES" -lt 1 ]]; then
-    echo "{\"error\": \"--idle-timeout-minutes must be a positive integer\"}"
-    exit 1
-  fi
-  export VISUAL_COMPANION_IDLE_TIMEOUT_MS=$(( IDLE_TIMEOUT_MINUTES * 60 * 1000 ))
 fi
 
 is_windows_like_shell() {
@@ -161,7 +147,7 @@ fi
 # Windows/MSYS2: Node.js cannot see POSIX PIDs from the MSYS2 namespace.
 # Passing a PID node cannot verify causes server to log owner-pid-invalid
 # and self-terminate at the 60-second lifecycle check. Clear it so the
-# watchdog is disabled and the idle timeout becomes the only shutdown trigger.
+# watchdog is disabled; the server then runs until stop-server.sh kills it.
 if is_windows_like_shell; then
   OWNER_PID=""
 fi

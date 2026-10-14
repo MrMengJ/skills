@@ -46,7 +46,7 @@ bash <skill-dir>/scripts/start-server.sh --project-dir <项目根目录> --open
 
 ## 每一轮怎么做
 
-1. **确认服务还在。** `<state_dir>/server-info` 存在、`<state_dir>/server-stopped` 不存在才算在。停了就用**同一个** `--project-dir` 重新启动：会复用原端口和密钥，用户已打开的页面会自己重连，不用发新地址。服务闲置 4 小时自动退出（`--idle-timeout-minutes` 可改）。
+1. **确认服务还在。** `<state_dir>/server-info` 存在、`<state_dir>/server-stopped` 不存在才算在。停了就用**同一个** `--project-dir` 重新启动：会复用原端口和密钥，用户已打开的页面会自己重连，不用发新地址。服务不会因为闲置自动退出，只在启动它的 agent 进程结束或执行停止脚本（第 7 步）时停。
 2. **写一屏。** 在 `screen_dir` 里新建 HTML 文件，服务器总是显示修改时间最新的那个。
    - 文件名要能看出内容：`layout.html`、`color-scheme.html`；改版加后缀：`layout-v2.html`。不要覆盖旧文件，旧版本留着方便回看。
    - 用文件写入工具写，不要用 `cat`/heredoc，否则 HTML 全文会刷进终端。
