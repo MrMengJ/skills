@@ -13,6 +13,17 @@ skills/
 
 Each skill directory holds a `SKILL.md` (frontmatter + instructions), optionally alongside `scripts/`, `references/`, `assets/`. Format follows the [Agent Skills spec](https://github.com/agentskills/agentskills).
 
+## 引入第三方 skill
+
+第三方 skill 默认不放进本仓库，由 `npx skills` 安装管理。只有确需修改时才引入，并且要先征得用户同意、说明理由。
+
+1. 下载上游到临时目录，只取 skill 本身需要的文件（`SKILL.md`、`references/`、`scripts/`、`assets/`、LICENSE），不取 README、测试和宣传图。
+2. 放进 `skills/<分类>/<名字>/`，保留 LICENSE，单独提交为基线。提交信息写明来源、版本和上游 commit。
+3. 每类修改单独提交，提交信息写明改了什么、为什么。
+4. 在仓库根的 `third-party.lock.json` 登记来源、上游 commit、基线提交、包含和排除的路径，并在下面的列表里注明来源和修改。
+5. 上游更新时：从基线提交拉分支，放入新快照并提交，再合并回主线；冲突逐块决定取舍。
+6. 查看相对上游的全部改动：`git diff <baselineCommit> HEAD -- skills/<分类>/<名字>`。
+
 ## Skills
 
 ### Design
