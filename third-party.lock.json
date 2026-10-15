@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "oil-ui": {
+      "path": "skills/design/oil-ui",
+      "source": "oil-oil/oil-ui",
+      "sourceUrl": "https://github.com/oil-oil/oil-ui.git",
+      "upstreamCommit": "2d34e30f8973b6c083f9bdbfe85653022975fa0d",
+      "upstreamVersion": "0.23.0",
+      "importedAt": "2026-10-15",
+      "baselineCommit": "483c3140a7a187ddd0670c73e08425f114f3fb71",
+      "include": ["SKILL.md", "LICENSE", "references/", "scripts/", "assets/"],
+      "exclude": ["assets/readme/"],
+      "license": "MIT"
+    }
+  }
+}

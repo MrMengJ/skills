@@ -28,6 +28,7 @@ Each skill directory holds a `SKILL.md` (frontmatter + instructions), optionally
 
 ### Design
 
+- **[oil-ui](./skills/design/oil-ui/SKILL.md)**: 界面设计流程：先探索几个风格不同的方向并排对比，选定后按真实截图迭代、独立评审。来自 MIT 协议的 [oil-oil/oil-ui](https://github.com/oil-oil/oil-ui)（0.23.0），已修改：只能手动调用，删除版本检查和推广内容，版权声明见目录内 LICENSE。
 - **[visual-companion](./skills/design/visual-companion/SKILL.md)**: 浏览器可视化协作工具：在本地网页里展示方案、收集用户点选，支持多轮迭代。脚本基于 MIT 协议的开源代码修改，版权声明见目录内 LICENSE。
 
 ### Documentation
