@@ -199,7 +199,8 @@ function isFullDocument(html) {
 }
 
 function wrapInFrame(content) {
-  return frameTemplate.replace('<!-- CONTENT -->', content);
+  // 函数形式：字符串里含 $&、$`、$' 时 String.replace 会当替换模式处理
+  return frameTemplate.replace('<!-- CONTENT -->', () => content);
 }
 
 function getNewestScreen() {
@@ -347,7 +348,7 @@ function handleRequest(req, res) {
       : waitingPage();
 
     if (html.includes('</body>')) {
-      html = html.replace('</body>', helperInjection + '\n</body>');
+      html = html.replace('</body>', () => helperInjection + '\n</body>');
     } else {
       html += helperInjection;
     }
