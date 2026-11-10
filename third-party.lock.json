@@ -23,7 +23,8 @@
       "baselineCommit": "17400b4b75ca8d526f70306de12de7f5edde7448",
       "include": ["LICENSE", "scripts/"],
       "exclude": ["SKILL.md", "visual-companion.md", "builder-check-prompt.md"],
-      "license": "MIT"
+      "license": "MIT",
+      "notes": "baselineCommit 本身已含改动（去品牌与遥测请求、会话目录改名），对照上游请用 v6.4.2 的 skills/brainstorming/scripts/ 原文件，不要只看 baselineCommit 的 diff。页面内容里 $& 等序列被替换模式破坏的修复已手动并入，改法与上游 v7.0.0 相同，同步上游 v7 时这一处不算分歧。"
     }
   }
 }

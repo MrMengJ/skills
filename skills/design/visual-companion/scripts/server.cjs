@@ -199,7 +199,7 @@ function isFullDocument(html) {
 }
 
 function wrapInFrame(content) {
-  // 函数形式：字符串里含 $&、$`、$' 时 String.replace 会当替换模式处理
+  // Function form: a string replacement would expand $&, $` and $' inside the content and garble the page.
   return frameTemplate.replace('<!-- CONTENT -->', () => content);
 }
 
