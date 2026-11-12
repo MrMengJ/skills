@@ -3,11 +3,16 @@
 
 用法：
   changed_copy.py                    工作区相对 HEAD 的改动（含未跟踪的新文件）
+  changed_copy.py --branch [主干]    当前分支从主干分出来以后的提交，加上工作区还没提交的改动
+                                     （含未跟踪的新文件）；不写主干时依次找 origin/HEAD 指的、main、master
   changed_copy.py --range A..B       两个提交之间的改动
   changed_copy.py --all [路径...]    不看改动，列出这些路径下所有界面文字
   加 --json 输出 JSON；加 --ascii 连纯英文的文字也列出来（英文界面或双语文案表用）
   加 -C 目录 在那个目录里运行
   加 --ext .foo,.bar 把这些扩展名也按普通源码扫一遍（默认范围之外的才需要，可重复写）
+  加 --exclude 路径,路径 不列这些路径下的文字，可重复写。写相对仓库根目录的路径（用了 -C 也一样），
+  目录写到哪一层都行；也可写通配符，* 会跨过 /，比如 'src/*demo*' 匹配 src/a/b/demo.tsx。
+  一条都没去掉的路径会在错误输出里提醒，多半是写错了。
 
 默认扫描：tsx jsx ts js mjs vue svelte html swift kt java dart json yaml；
 集中文案文件 strings.xml（含 arrays、plurals）、.strings、.xcstrings、.arb、.po、.properties
@@ -35,6 +40,7 @@ className、id、href、type 等属性里的英文不取。日志调用（consol
 读清单的人要自己对照代码确认。
 """
 import argparse
+import fnmatch
 import html
 import json
 import os
@@ -677,6 +683,39 @@ def from_files(root, paths, ascii_ok):
     return items
 
 
+def exclude_patterns(raw, root):
+    """输出里的文件路径都相对仓库根目录；绝对路径和 ./ 开头的写法不换算的话，一条都匹配不上。"""
+    out = []
+    for chunk in raw:
+        for p in chunk.split(','):
+            p = p.strip()
+            if not p:
+                continue
+            if os.path.isabs(p):
+                p = os.path.relpath(os.path.realpath(p), root)
+            while p.startswith('./'):
+                p = p[2:]
+            out.append(p.rstrip('/') or '.')
+    return out
+
+
+def matches(path, pat):
+    return fnmatch.fnmatch(path, pat) or path.startswith(pat + '/')
+
+
+def main_branch(root):
+    names = []
+    head = git(['symbolic-ref', '--quiet', '--short', 'refs/remotes/origin/HEAD'], root).strip()
+    if head.startswith('origin/'):
+        names.append(head[len('origin/'):])
+    names += ['main', 'master']
+    for name in dict.fromkeys(names):
+        for ref in ('refs/heads/' + name, 'refs/remotes/origin/' + name):
+            if git(['rev-parse', '--verify', '--quiet', ref], root).strip():
+                return name if ref.startswith('refs/heads/') else 'origin/' + name
+    return None
+
+
 def hints_for(text):
     plain = BRANDS.sub(' ', re.sub(r'\$?\{[^{}]*\}', '…', text))  # 占位符里的变量名用户看不到
     return [name for name, rx in HINTS if rx.search(plain)]
@@ -692,10 +731,12 @@ def main():
     ap = argparse.ArgumentParser(description='列出改动里新增或修改的界面文字')
     ap.add_argument('paths', nargs='*')
     ap.add_argument('--range', dest='rng')
+    ap.add_argument('--branch', nargs='?', const='', default=None, metavar='主干')
     ap.add_argument('--all', action='store_true')
     ap.add_argument('--ascii', action='store_true')
     ap.add_argument('--json', action='store_true')
     ap.add_argument('--ext', action='append', default=[], metavar='.foo,.bar', help='补充扫描这些扩展名，逗号分隔')
+    ap.add_argument('--exclude', action='append', default=[], metavar='路径,路径', help='不列这些路径下的文字，逗号分隔')
     ap.add_argument('-C', dest='cwd', default='.')
     a = ap.parse_args()
     for chunk in a.ext:
@@ -721,6 +762,7 @@ def main():
             return lambda p: read_text(os.path.join(root, p))
         return lambda p: git(['show', '%s:%s' % (ref, p)], root) or None
 
+    notes = []
     if a.all:
         # 路径参数是相对运行目录写的，换算成相对仓库根目录
         rel = [os.path.relpath(os.path.realpath(os.path.join(a.cwd, p)), root) for p in a.paths]
@@ -728,10 +770,35 @@ def main():
     elif a.rng:
         items = from_diff(git(diff_args(a.rng), a.cwd), a.ascii, reader(new_side(a.rng)))
     else:
-        items = from_diff(git(diff_args('HEAD'), a.cwd), a.ascii, reader(None))
+        base = 'HEAD'
+        if a.branch is not None:
+            trunk = a.branch or main_branch(root)
+            fork = git(['merge-base', trunk, 'HEAD'], root).strip() if trunk else ''
+            if fork:
+                base = fork
+                notes.append(f'范围：从 {trunk} 分出来以后的提交（分叉点 {fork[:8]}），加上还没提交的改动。')
+            else:
+                notes.append(f'找不到主干{"「" + trunk + "」" if trunk else ""}，只取了还没提交的改动。')
+        items = from_diff(git(diff_args(base), a.cwd), a.ascii, reader(None))
         untracked = git(['ls-files', '-z', '--others', '--exclude-standard', '--full-name', '--'] + a.paths, a.cwd)
         for path in filter(None, untracked.split('\0')):
             items += scan_path(root, path, a.ascii)
+
+    patterns = exclude_patterns(a.exclude, root)
+    hit = {p: 0 for p in patterns}
+    kept = []
+    for i in items:
+        found = [p for p in patterns if matches(i['file'], p)]
+        for p in found:
+            hit[p] += 1
+        if not found:
+            kept.append(i)
+    if len(kept) < len(items):
+        notes.append(f'按 --exclude 去掉了 {len(items) - len(kept)} 条（{"、".join(p for p in patterns if hit[p])}）。')
+    for p, n in hit.items():
+        if not n:
+            print(f'提醒：--exclude {p} 一条都没去掉，看看路径是不是写错了（要相对仓库根目录写）。', file=sys.stderr)
+    items = kept
 
     for i in items:
         i['hints'] = hints_for(i['text'])
@@ -739,10 +806,14 @@ def main():
             i['hints'].append('文件名带 prompt，可能是写给模型看的，不是界面文字')
 
     if a.json:
+        for n in notes:
+            print(n, file=sys.stderr)
         json.dump(items, sys.stdout, ensure_ascii=False, indent=1)
         return
+    for n in notes:
+        print(n)
     if not items:
-        print('没有找到新增或修改的界面文字。')
+        print('这些路径下没有找到界面文字。' if a.all else '没有找到新增或修改的界面文字。')
         return
     print(f'共 {len(items)} 条，分布在 {len({i["file"] for i in items})} 个文件。「留意」只是提醒，不是结论。\n')
     last = None
