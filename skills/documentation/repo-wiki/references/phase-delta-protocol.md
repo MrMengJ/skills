@@ -16,7 +16,7 @@
 | Δ.4 | `python3 $SKILL_ROOT/scripts/delta-conflicts.py check --meta-dir {{WIKI_ROOT}}/.wiki-meta/ --wiki-root {{WIKI_ROOT}}` | `ok`, `conflicts[]`, `clean[]` |
 | Δ.7 write | `python3 $SKILL_ROOT/scripts/delta-schema.py write-staging --meta-dir {{WIKI_ROOT}}/.wiki-meta/ < <new_index_json>` | `ok`, `staging` |
 | Δ.7 commit | `python3 $SKILL_ROOT/scripts/delta-schema.py commit-staging --meta-dir {{WIKI_ROOT}}/.wiki-meta/` | `ok` |
-| Δ.7 rollback | `python3 $SKILL_ROOT/scripts/delta-schema.py rollback-staging --meta-dir {{WIKI_ROOT}}/.wiki-meta/` | `ok` |
+| Δ.7 rollback | `python3 $SKILL_ROOT/scripts/delta-schema.py rollback-staging [--keep] --meta-dir {{WIKI_ROOT}}/.wiki-meta/` | `ok` |
 | Δ.7 page | `python3 $SKILL_ROOT/scripts/delta-schema.py update-page --meta-dir ... --page <rel> --sha256 <hash> --template-version <n>` | `ok`, `changed` |
 | Δ.8 | `python3 $SKILL_ROOT/scripts/delta-git.py orphan-scan --meta-dir {{WIKI_ROOT}}/.wiki-meta/ --repo-root . --base {{LAST_SYNCED_COMMIT}} --no-truncate` | `orphans[]`, `clusters[]`, `added_since_base` |
 | Δ.9 | `python3 $SKILL_ROOT/scripts/delta-schema.py update-sync --meta-dir {{WIKI_ROOT}}/.wiki-meta/ --commit HEAD --branch <name>` | `ok` |
@@ -186,7 +186,7 @@ python3 $SKILL_ROOT/scripts/delta-git.py affected-pages \
   --no-truncate
 ```
 
-输出四组：`primary`（整页重写候选）/ `supporting`（提示不重写）/ `deprecated`（候选删除）/ `needs_review`（没有任何源码锚点，或 primary 只被删了一部分——这两种情况从前三组里漏掉，必须人看一眼），外加完整计数 `counts` 与 `reasons`（每页命中了哪些路径、什么角色、改动还是删除）。**汇总展示时直接用 `reasons`，不要自己重做反向映射**——连续两轮评测里 agent 都因为拿不到命中原因而重写了一遍映射逻辑。
+输出四组：`primary`（整页重写候选）/ `supporting`（提示不重写）/ `deprecated`（候选删除）/ `needs_review`（没有任何源码锚点，或 primary 只被删了一部分——这两种情况从前三组里漏掉，必须人看一眼），外加完整计数 `counts` 与 `reasons`（每页命中了哪些路径、什么角色、改动还是删除）。**汇总展示时直接用 `reasons`，不要自己重做反向映射**。
 做汇总展示时直接加 `--no-truncate` 取全量（默认截断到 50 条，是为防止刷屏，不是为分批）；只有在确实要分批派发工作 agent 时才按批处理。
 
 ---
@@ -261,7 +261,7 @@ echo '<new_index_json>' | python3 $SKILL_ROOT/scripts/delta-schema.py write-stag
 python3 $SKILL_ROOT/scripts/delta-schema.py commit-staging \
   --meta-dir {{WIKI_ROOT}}/.wiki-meta/
 
-# 中途失败时：rollback（保留 staging 文件供 debug）
+# 中途失败时：rollback（默认直接删除 staging；要保留供 debug 加 --keep，会改名为 staging-<时间戳>.json）
 python3 $SKILL_ROOT/scripts/delta-schema.py rollback-staging \
   --meta-dir {{WIKI_ROOT}}/.wiki-meta/
 ```

@@ -17,7 +17,7 @@ disable-model-invocation: true
 
 **它做了什么**：标准化「调研 → 受众对齐 → 章节规划 → 分轮生成 → 验证 → 增量更新」全流程；提供四种页面模板 + 模板复用矩阵；给出防超时、防幻觉、Mermaid 规范、源码引用规范等通用工程约束；提供增量更新机制（git diff + 模板版本 + sha256 冲突检测）。
 
-**它不做什么**：不预设章节结构、受众类型、页数/轮数/输出目录/命名风格/输出语言/图表密度，不假设项目是 fork，不绑定特定 AI 平台。
+**它不做什么**：不预设章节结构、受众类型、页数/轮数/输出目录/输出语言/图表密度，不假设项目是 fork，不绑定特定 AI 平台。
 
 **支持项目形态**：前端库、后端服务、CLI、SDK、单体业务、多语言 monorepo、微服务集群、fork 项目、有 ADR 历史的非 fork 项目。
 
@@ -52,19 +52,25 @@ disable-model-invocation: true
 检测 --upgrade 参数
   → 是 → 进入「--upgrade 分支」
 
-检测 --update / --rebuild / --dry-run 参数
+检测 --rebuild 参数
+  → 是 → 先把现有 wiki 备份为 <wiki>.bak-<时间戳>/，再按 Phase 0 全量重新生成（不走 Phase Δ）
+
+检测 --update / --dry-run 参数
   → 是 → 进入 Phase Δ（增量更新模式）
 
-检测 {{WIKI_ROOT}}/.wiki-meta/index.json 是否存在
+检测已有 wiki 的 .wiki-meta/index.json 是否存在（依次看 ./wiki/、./docs/wiki/、./.wiki/；用户指定了目录以用户的为准）
   → 存在 → 询问用户：
       「检测到已有 wiki meta，您想：
        (a) 增量更新（推荐）  (b) 从头重建  (c) 仅查看上次同步状态
        [ ? 查看说明 | cancel 取消 ]」
-    → a/b → Phase Δ
+    → a → Phase Δ
+    → b → 同 --rebuild
     → c → 展示 index.json 摘要后退出
 
 无参数且无 .wiki-meta/ → 进入 Phase 0（首次生成）
 ```
+
+`--from <commit>`（指定增量基线）和 `--platform=tierN`（强制交互层级）是修饰参数，随上面的模式一起传入，不单独路由。`--rebuild` 与 `--update` 找已有 wiki 的方式同上一步。
 
 **参数复述原则**：不硬解析，先复述解析结果（模式 / 范围 / 起始 commit / 是否 dry-run），等用户确认后再执行。
 
@@ -117,7 +123,7 @@ disable-model-invocation: true
 
 ## Phase Δ — 增量更新模式
 
-触发条件：用户传 `--update` / `--rebuild` / `--dry-run`，或在交互询问中选择增量更新。
+触发条件：用户传 `--update` / `--dry-run`，或在交互询问中选择增量更新。
 
 **调度器进入 Phase Δ 前先 Read `$SKILL_ROOT/references/phase-delta-protocol.md` 获取完整步骤。**
 
@@ -214,7 +220,7 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 
 ## Phase 0 — 决策点序列（D1–D5）
 
-### 交互执行规范（能力探测分层，v2.1+）
+### 交互执行规范（能力探测分层）
 
 调度器在进入 Phase 0 第一个决策点前先做**能力探测**：
 1. 查 `{{WIKI_ROOT}}/.wiki-meta/runtime.json` 的 `platform_capabilities.has_structured_input_tool` 缓存（若 wiki 已生成过）
@@ -227,11 +233,11 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 
 具体工具名与平台映射见 `references/decision-points.md` 「Tier 1 工具绑定」节。
 
-**所有决策点 prompt 末尾必须附加**：`[ ? 查看说明 | back 回上步 | skip-all 全部默认 | edit-schema 直接改 .wiki-meta | cancel 取消 ]`
+**每个决策点 prompt 末尾附加元命令行**，完整集合为：`[ ? 查看说明 | back 回上步 | skip-all 全部默认 | edit-schema 直接改 .wiki-meta | cancel 取消 ]`（第一个决策点没有 `back`；`references/decision-points.md` 的示例只写该步骤常用的几项，调度器对全部元命令都要识别）。
 
 **非交互模式**：调用方在首条消息里就给全了 D1–D5 的答案（自动化脚本、CI、批量为多个仓库生成时的常见形态），则不再逐项询问，只复述一次解析结果并继续；缺失项取默认值并在复述里标出。判断依据是「答案是否已经在上下文里」，不是某个 flag。**本文中所有写着「必须询问用户」的地方**（含多语言信号识别）在非交互下一律改为：取探测到的首选值，并在复述里标出这是自动选择的。
 
-主流程识别元命令（不把它们当作选项内容）：`?` 展示说明 / `back` 回上步 / `skip-all` 取默认 / `edit-schema` 直接编辑 schema / `cancel` 退出。
+主流程识别元命令（不把它们当作选项内容）：`?` 展示说明 / `back` 回上步 / `skip-all` 取默认 / `edit-schema` 直接编辑 schema / `save-default` 把当前选择写成用户级偏好（见 `references/user-preferences.md`）/ `cancel` 退出。
 
 **调度器在 Phase 0 末尾 Read `$SKILL_ROOT/references/decision-points.md` 获取完整 prompt UI 文本再提问。**
 
@@ -242,7 +248,7 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 | **D2** 输出语言 | 中文 / 英文 / 跟随项目主语言（读用户偏好 `~/.repo-wiki/user-preferences.json` 作默认；字段与优先级见 `references/user-preferences.md`）| `output_language` |
 | **D3** 章节草稿确认 | 按受众分组展示草稿；四选一：全部接受 / 逐章调整 / 自由文本编辑 / 重新调研 | — |
 | **D4** 输出目录 | `./wiki/` / `./docs/wiki/` / `./.wiki/` / 自定义；写入 `wiki_root`，全文用 `{{WIKI_ROOT}}` 占位 | `wiki_root` |
-| **D5** Mermaid 图表 | 启用（默认）/ 仅概念混合型 / 完全禁用 | `run_config.mermaid_enabled` |
+| **D5** Mermaid 图表 | 启用（默认）/ 完全禁用 | `run_config.mermaid_enabled` |
 | **C1** 暂停偏好 | **第一轮结束后**追问；三选一：每轮暂停 / 一气跑完 / 仅风险点暂停 | `run_config.pause_between_rounds` |
 
 ---
@@ -262,11 +268,11 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 | G 按部署单元 | 微服务 / 多 Lambda | 每个 `cmd/<service>` 一组 + 跨服务协议 |
 | H 重大决策 | fork / ADR / 技术栈迁移 | `decision-log` 模板，`DECISION_TYPE` 区分 |
 
-受众目录的命名词由 D3 用户落定（如 `维护者指南/`、`开发指南/`、`运维手册/`），但受众 / 章节 / 页面三层层级自 v2.1 起固定，工作 agent 不得输出扁平结构。
+受众目录的命名词由 D3 用户落定（如 `维护者指南/`、`开发指南/`、`运维手册/`），但受众 / 章节 / 页面三层层级固定，工作 agent 不得输出扁平结构。
 
-### 目录结构约束（v2.1+ 强制）
+### 目录结构约束（强制）
 
-输出必须为三层结构：`{{WIKI_ROOT}}/<受众目录>/<NN-章节目录>/<NN-页面.md>`
+输出必须为三层结构：`{{WIKI_ROOT}}/<受众目录>/<NN-章节目录>/<NN-页面.md>`。目录名和文件名一律用中文，与 D2 选的输出语言无关。
 
 - **受众目录**：命名为语义对齐的**全中文**名（如「维护者指南」「使用者指南」「业务说明」），不混入英文标识符
 - **章节目录**：命名 `NN-中文主题`（两位数字编号 + 全中文短名，英文专有名词允许保留，如 `05-Git历史清理机制`、`06-LicenseKey更新流程`，但避免 `05-cleanGit-Git历史...` 这种含多个连字符的混名）。**编号在各受众目录内独立，不跨受众目录做全局连续编号**（例如：维护者指南/01-xxx … 09-xxx，使用者指南/01-xxx … 02-xxx）。
@@ -317,10 +323,10 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 ### 逐页处理规则（防看门狗超时，必须原文复制到每个 agent prompt）
 
 ```
-⚠️ 工作模式（极重要）
+⚠️ 工作模式
 逐页处理，写完一页立即存盘再处理下一页。
 每页顺序：只读该页所需源码（2-5 个文件）→ 生成内容 → 写文件 → 下一页
-绝对不要在写任何内容之前读取多个页面的源码。
+不要在写任何内容之前读取多个页面的源码：长时间没有任何输出，调度器会终止本 agent，已读未写的内容全部丢失。
 ```
 
 **为什么有这条约束**：主流 AI agent 执行环境通常对工作 agent 设置了输出流看门狗（watchdog）：当工作 agent 在固定时长内没有产生任何输出（包括工具调用反馈），调度器会主动终止它（错误形如 `stalled: no progress for N seconds`）。Claude Code 中此阈值为 600 秒。
@@ -328,7 +334,7 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 ### Mermaid 规范（必须原文复制到每个 agent prompt）
 
 ```
-⚠️ Mermaid 规范（严格遵守）
+⚠️ Mermaid 规范
 1. 严禁在节点标签中出现 \n（反斜杠+字母n）— 这在 mermaid 中是字面文字不是换行
 2. flowchart/classDiagram 节点换行：用 <br/> 标签，如 A["第一行<br/>第二行"]
 3. timeline 类型多行：用 ": 第二行" 续行语法，每行 ≤12 汉字
@@ -350,7 +356,7 @@ git log --since="6 months ago" --name-only --pretty=format: | sort | uniq -c | s
 | 架构 / 机制 | `conceptual.md` | ≥1 mermaid，5 段结构 |
 | 带丰富 API 的实体 | `mixed.md` | 5 段：定位→动机→机制→API 表→维护要点 |
 | API / 配置参考 | `reference.md` | 速查表 + 每实体：签名/参数/行为/示例/源码 |
-| 重大决策记录 | `decision-log.md` | 4 段：意图/改动入口/风险与回归点/查看实现 |
+| 重大决策记录 | `decision-log.md` | 4 段：决策动机/变更入口/风险与权衡/查看实现 |
 
 ---
 
@@ -368,7 +374,7 @@ python3 $SKILL_ROOT/scripts/wiki-stats.py --wiki-root $WIKI_ROOT --min-chars <�
 
 **验证通过标准**：
 
-- [ ] 实际生成页数 ≥ D3 目标值（schema `target_pages`）的 **95%**（`wiki-stats.py` 的总页数含章节 README 与 GLOSSARY，比对前先扣除）
+- [ ] 实际生成页数 ≥ D3 目标值（schema `target_pages`）的 **95%**（`wiki-stats.py` 的总页数已排除章节 README 与 GLOSSARY，可直接比较）
 - [ ] 每章实际页数与规划差异 ≤ **±20%**（超出章节列出，由用户确认）
 - [ ] `.followup.md` 待办条数 ≤ 总页数的 **10%**（超出说明 anchor 调研不足）
 - [ ] `GLOSSARY.md` 存在（`wiki-stats.py` 会直接报告）
@@ -384,7 +390,7 @@ python3 $SKILL_ROOT/scripts/wiki-stats.py --wiki-root $WIKI_ROOT --min-chars <�
   | > 300 | 2200 | 大仓库单页承载的机制更多 |
 
   决策记录型（ADR）在任何规模下再降 300：它只写动机、变更入口与风险，不重复实现细节。
-  **用 `wiki-stats.py --min-chars <门槛> --per-page` 逐页核对**，不要目测——连续两轮评测里首稿全部不达标，各多花了一轮补写。
+  **用 `wiki-stats.py --min-chars <门槛> --per-page` 逐页核对**，不要目测：目测估字数，首稿普遍不达标，要多花一轮补写。
   注意报告里的两列不是一回事：「汉字」按中日韩表意文字计（门槛看这一列），「非空白」含标点、英文、路径，通常是前者的 2–3 倍。
 
 **工作 agent 卡死（看门狗超时）处理**：检查 crash 前已写出的文件 → 只针对未写出的页重新派 agent → 重启 agent 时把「逐页处理」规则放在 prompt 最显眼处 → 若持续卡死则减少到 3-4 页/agent。
@@ -409,7 +415,7 @@ schema v2 采用拆文件结构：`index.json`（顶层元信息）+ `pages/<受
 
 ```
 skill v2.0.x  ⇄  schema v2    ⇄  template v2.x.y
-skill v2.1.x  ⇄  schema v2.1  ⇄  template v2.x.y（不变）
+skill v2.1.x  ⇄  schema v2    ⇄  template v2.x.y（不变）
 ```
 
 schema 升级时（major 版本变更），必须：在 CHANGELOG.md 中写明不兼容变更 + 提供迁移脚本 `scripts/migrate-meta.py --from-version N --to-version M` + 更新此兼容矩阵。

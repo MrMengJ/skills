@@ -1,5 +1,4 @@
 <!-- template-version: 2 -->
-<!-- 重建说明：原件于 2026-09-03 丢失，本文按 SKILL.md / decision-points.md 中对用户级偏好的引用重写（2026-09-04）。 -->
 # 用户级偏好（`~/.repo-wiki/user-preferences.json`）
 
 跨项目沿用的默认值。**只影响决策点的默认选项**，不跳过决策点；项目级 schema（`.wiki-meta/index.json`）一旦写入即覆盖用户级偏好。
@@ -31,9 +30,9 @@ CLI 参数（--platform / --from …）
 | 字段 | 影响的决策点 | 取值 | 内置默认 |
 |---|---|---|---|
 | `default_output_language` | D2 | `zh` / `en` / `follow-project` | `follow-project` |
-| `default_mermaid_enabled` | D5 | `true` / `"conceptual-only"` / `false` | `true` |
+| `default_mermaid_enabled` | D5 | `true` / `false` | `true` |
 | `default_wiki_root` | D4 | 相对项目根的路径 | `./wiki/` |
-| `default_pause_between_rounds` | C1 | `always` / `never` / `first-time-only` / `risk-points-only` | `always` |
+| `default_pause_between_rounds` | C1 | `always` / `never` / `risk-points-only` | `always` |
 | `default_audience_primary` | D1.1 | `maintainer` / `user` / `newcomer` / `business` | `maintainer` |
 | `platform_tier` | 交互执行规范 | `null`（自动探测）/ `1` / `2` / `3` | `null` |
 | `watchdog_seconds` | 分轮执行规范 | 正整数 | `600` |

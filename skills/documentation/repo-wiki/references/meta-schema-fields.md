@@ -1,5 +1,4 @@
 <!-- template-version: 2 -->
-<!-- 说明：本文内容原位于 SKILL.md「.wiki-meta/ Schema 定义」与「SKILL_ROOT 解析协议」节，2026-09-04 v2.1.1 按渐进式披露原则下沉至此。JSON Schema 本体见 meta-schema.json。 -->
 # .wiki-meta/ 字段速查与兼容说明
 
 调度器在写入或校验元数据时（首次生成 Phase 2、Phase Δ.-1 / Δ.7 / Δ.9）Read 本文；完整约束以 `meta-schema.json` 为准，脚本侧由 `scripts/delta-schema.py` 执行。

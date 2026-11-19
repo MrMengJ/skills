@@ -1,5 +1,4 @@
 <!-- template-version: 2 -->
-<!-- 重建说明：原件于 2026-09-03 丢失，本文按 SKILL.md「SKILL_ROOT 解析协议」节与已生成 wiki 的 runtime.json 实例重写（2026-09-04）。 -->
 # SKILL_ROOT 解析协议（v1）
 
 `{{SKILL_ROOT}}` 是 skill 根目录路径占位符。SKILL.md 中所有 `$SKILL_ROOT/scripts/...`、`$SKILL_ROOT/references/...` 都以它为基准。调度器启动时按 5 级 fallback 解析一次，成功后写入 `{{WIKI_ROOT}}/.wiki-meta/runtime.json`，下次启动直接命中缓存。

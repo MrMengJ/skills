@@ -3,10 +3,11 @@
 
 调度器在 Phase 0 调研完成后 Read 本文件，获取每个决策点的完整展示文本。
 
-**所有决策点 prompt 末尾必须附加**：
+**每个决策点 prompt 末尾附加元命令行**，完整集合为：
 `[ ? 查看说明 | back 回上步 | skip-all 全部默认 | edit-schema 直接改 .wiki-meta | cancel 取消 ]`
+第一个决策点没有 `back`；下文各决策点的示例只写该步骤常用的几项，调度器对全部元命令都要识别。
 
-主流程必须识别这些元命令而非把它们当作选项内容（`?` 展示说明、`back` 回上步、`skip-all` 全部取默认值、`edit-schema` 直接开放 schema 编辑、`cancel` 退出）。
+主流程必须识别这些元命令而非把它们当作选项内容（`?` 展示说明、`back` 回上步、`skip-all` 全部取默认值、`edit-schema` 直接开放 schema 编辑、`save-default` 把当前选择写成用户级偏好、`cancel` 退出）。
 
 ---
 
@@ -22,7 +23,7 @@
 
 调度器优先按能力探测结果（尝试调用 → 成功/失败）选 Tier，上表仅作 fallback 参考。用户可通过 `--platform=tier1/tier2/tier3` 强制指定。
 
-**Tier 1 实现规则**：D1.1 / D1.2 / D2 / D4 / D5 / C1 均用 `AskUserQuestion` 呈现（单选用 `type: select`，多选用 `type: multi_select`）；D3 因含自由文本编辑路径（选项 c）必须降级到文本路径（见下方 D3 状态转移表）。
+**Tier 1 实现规则**：D1.1 / D1.2 / D2 / D4 / D5 / C1 均用 `AskUserQuestion` 呈现（单选题 `multiSelect` 取 `false`，多选题取 `true`；每题 2–4 个选项，工具会自动补一个「Other」供用户自填）；D3 因含自由文本编辑路径（选项 c）必须降级到文本路径（见下方 D3 状态转移表）。
 
 ---
 
@@ -105,12 +106,12 @@ wiki 用什么语言写？
 |---|---|---|---|
 | **(a)** 全部接受 | 草稿无需改动 | 直接写入 `.wiki-meta/index.json` 的 `chapters[]` | → D4 |
 | **(b)** 逐章调整 | 改某些章节的名字/页数/类型 | Tier 1 弹多选"选要调整的章节"；Tier 2 提示"输入章节编号列表（逗号分隔）"；逐章追问字段后写入 | 全部完成 → D4 |
-| **(c)** 自由文本编辑 | 手动写 chapters 清单 | 打开系统编辑器让用户改 `.wiki-meta/chapters-draft.yaml`，保存后解析回写；**Tier 1 也必须走文本路径**（此选项含编辑器交互，无法用结构化工具实现） | 解析成功 → D4；失败 → 回 D3 |
+| **(c)** 自由文本编辑 | 手动写 chapters 清单 | 请用户在对话里贴出修改后的章节列表，解析后写入 `chapters[]`；**Tier 1 也必须走文本路径**（自由文本无法用结构化选项实现） | 解析成功 → D4；失败 → 回 D3 |
 | **(d)** 重新调研 | 草稿严重偏题 | 清空调研缓存，跳回 Phase 0 静默调研段 | 重新走 D1 → D3 |
 
 选 (c) 时用户贴修改后清单，调度器重新解析并**二次复述给用户确认**。
 
-fork 决策日志作为草稿中的一章呈现（不单独询问），类型标为 `decision-log`（fork 项目）或 `adr`（非 fork 项目）。
+fork 决策日志作为草稿中的一章呈现（不单独询问），类型一律标为 `decision-log`；fork 与否由页内 `DECISION_TYPE` 区分（`fork-delta`、`architectural-evolution` 等）。
 
 ---
 
@@ -136,8 +137,7 @@ wiki 输出到哪个目录？
 ```
 是否启用 mermaid 图？
 (a) 启用（默认，概念/混合型页面各 ≥1 个）
-(b) 仅在概念/混合型页面启用（保守）
-(c) 完全禁用（适合在 Confluence / 不支持 mermaid 的平台发布）
+(b) 完全禁用（适合在 Confluence / 不支持 mermaid 的平台发布）
 [ back | skip-all | cancel ]
 ```
 
