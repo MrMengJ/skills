@@ -221,7 +221,7 @@ python3 <skill-dir>/scripts/changed_copy.py --all src/       # 这些路径下�
 
 ### 3. 对照十类问题
 
-读 `<skill-dir>/references/checklist.md` 和 `<skill-dir>/references/conventions.md`。第 4、6、8、9、10 类要看代码和别的页面才能判断，由你自己答：程序是否真知道这个原因、改动是不是改过头、位置和宽度合不合适、两处叫法放在各自的位置会不会让人以为是两样东西、这句是不是产品界面、主流产品在同一个位置怎么写。
+读 `<skill-dir>/references/checklist.md` 和 `<skill-dir>/references/conventions.md`。第 4、6、8、10 类要看代码和别的页面才能判断，由你自己答：程序是否真知道这个原因、改动是不是改过头、位置和宽度合不合适、这句是不是产品界面、主流产品在同一个位置怎么写。第 9 类（两处叫法放在各自的位置会不会让人以为是两样东西）先自己判断，拿不准再放进复述清单。
 
 ### 4. 复述测试
 
