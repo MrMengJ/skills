@@ -54,7 +54,7 @@ python3 "SCRIPTS_DIR/bili_info.py" '链接或 BV 号'
 H="${HF_HUB_CACHE:-${HF_HOME:-$HOME/.cache/huggingface}/hub}"; f=$(find "$H/models--mlx-community--whisper-medium-mlx/snapshots" -name 'weights.*' 2>/dev/null | head -1); [ -n "$f" ] && [ -e "$f" ] && echo MODEL_READY || echo MODEL_MISSING
 ```
 
-输出 `MODEL_MISSING`（包括以前下载到一半的情况）：先对用户说明再继续，例如「第一次用，需要先下载约 1.4 GB 的语音识别模型（来自 Hugging Face，一个放 AI 模型的网站），另外还有几百 MB 的配套组件，要几分钟到十几分钟，看网速。要继续吗？」得到同意再往下做。输出 `MODEL_READY` 就直接做。要换更大的 `large-v3` 模型时，把命令里的 `medium` 换成 `large-v3` 检查；没下载过要再下载约 3 GB，同样先问。
+输出 `MODEL_MISSING`（包括以前下载到一半的情况）：先对用户说明再继续，例如「第一次用，需要先下载约 1.5 GB 的语音识别模型（来自 Hugging Face，一个放 AI 模型的网站），另外还有几百 MB 的配套组件，要几分钟到十几分钟，看网速。要继续吗？」得到同意再往下做。输出 `MODEL_READY` 就直接做。要换更大的 `large-v3` 模型时，把命令里的 `medium` 换成 `large-v3` 检查；没下载过要再下载约 3 GB，同样先问。
 
 预计用时（分钟）约等于视频时长（分钟）÷ 5 再加 1。**预计超过 6 分钟（视频超过约 25 分钟），或者模型还没下载过，一律放到后台运行**：用工具自带的后台运行方式（Claude Code 的 Bash 工具有 `run_in_background` 选项），等它结束的通知再读输出。不要自己加 `&`、`nohup`，也不要写 sleep 循环去等。前台运行时，超时设为 600000 毫秒。超过 25 分钟的视频，开始前先告诉用户预计用时。
 
